@@ -189,6 +189,8 @@ if (tg) {
   } catch (e) {}
 }
 
+const TG_USER = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
+
 const BANKS = [
   { key: 'bio', title: 'Biologiya (mikroskop, hujayra)', file: 'bio.json' },
   { key: 'chem', title: "Kimyo/Biokimyo (elementlar, eritmalar)", file: 'chem.json' },
@@ -202,6 +204,9 @@ const BANKS = [
   { key: 'ingliz_ru', title: "Английский язык (вопрос по-русски)", gen: () => genEnglishBank('ru') },
   { key: 'ingliz_en', title: "English (fully in English)", gen: () => genEnglishBank('en') },
 ];
+if (TG_USER && TG_USER.id) {
+  BANKS.push({ key: 'mening', title: '📥 Mening savollarim', api: `/api/user_bank?uid=${TG_USER.id}` });
+}
 const QUIZ_LEN = null; // null = bankdagi barcha savollar
 
 let questionBanks = {};
@@ -232,6 +237,10 @@ async function loadBanks() {
     try {
       if (b.gen) {
         questionBanks[b.key] = b.gen();
+      } else if (b.api) {
+        const res = await fetch(b.api);
+        const data = await res.json();
+        questionBanks[b.key] = Array.isArray(data) ? data : [];
       } else {
         const res = await fetch(b.file);
         const data = await res.json();
@@ -260,6 +269,13 @@ function renderBankList() {
 function openBank(bankKey) {
   currentBankKey = bankKey;
   const pool = questionBanks[bankKey] || [];
+  if (pool.length === 0) {
+    const msg = bankKey === 'mening'
+      ? "Hali savol yuklamagansiz. Botga /savol_yukla buyrug'ini yuboring - u yerda formatni ko'rsatadi, so'ng .json yoki .txt fayl yuborsangiz, shu bank to'ladi."
+      : "Bu bankda hozircha savollar yo'q.";
+    if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
+    return;
+  }
   const hasTopics = pool.length > 0 && pool.every(it => !!it.topic);
   if (hasTopics) {
     showTopics(bankKey);
