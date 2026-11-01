@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Test</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #12181f;
+    --text: #ffffff;
+    --hint: #aab4bf;
+    --button: #2ea6ff;
+    --button-text: #ffffff;
+    --secondary-bg: #1f2a36;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
+  .screen { display: none; padding: 16px; max-width: 560px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  .title { font-size: 22px; font-weight: 700; margin: 8px 0 4px; }
+  .subtitle { color: var(--hint); font-size: 14px; margin-bottom: 20px; }
+
+  .bank-card {
+    background: var(--secondary-bg);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform .08s ease;
+    border-left: 5px solid #5b8def;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .bank-card:nth-of-type(2) { border-left-color: #34c759; }
+  .bank-card:nth-of-type(3) { border-left-color: #ff9f0a; }
+  .bank-card:nth-of-type(4) { border-left-color: #ff375f; }
+  .bank-card:active { transform: scale(0.98); }
+  .bank-card .bank-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+  .bank-card .bank-count { color: var(--hint); font-size: 13px; }
+
+  .progress-wrap {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px; font-size: 13px; color: var(--hint);
+  }
+  .progress-bar {
+    height: 6px; background: var(--secondary-bg); border-radius: 3px;
+    overflow: hidden; margin-bottom: 18px;
+    border: 1px solid rgba(128,128,128,0.25);
+  }
+  .progress-fill {
+    height: 100%; background: var(--button); width: 0%;
+    transition: width .25s ease;
+  }
+
+  .q-text {
+    font-size: 18px; font-weight: 600; line-height: 1.4;
+    margin-bottom: 20px; min-height: 60px;
+  }
+
+  .option {
+    display: block; width: 100%; text-align: left;
+    background: var(--secondary-bg); color: var(--text);
+    border: 1px solid transparent; border-left: 5px solid #5b8def;
+    border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 10px;
+    font-size: 15px; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: background .15s ease, border-color .15s ease, transform .08s ease;
+  }
+  .option:nth-of-type(4n+1) { border-left-color: #5b8def; }
+  .option:nth-of-type(4n+2) { border-left-color: #34c759; }
+  .option:nth-of-type(4n+3) { border-left-color: #ff9f0a; }
+  .option:nth-of-type(4n+4) { border-left-color: #ff375f; }
+  .option:active { transform: scale(0.99); }
+  .option.correct {
+    background: #e3f9e5; border-color: #34c759; border-left-color: #34c759; color: #1a7a2e;
+  }
+  .option.wrong {
+    background: #fde8e8; border-color: #ff3b30; border-left-color: #ff3b30; color: #a3281f;
+  }
+  .option.disabled { pointer-events: none; }
+
+  .btn {
+    display: block; width: 100%; text-align: center;
+    background: var(--button); color: var(--button-text);
+    border: none; border-radius: 12px; padding: 14px 16px;
+    font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px;
+  }
+  .btn.secondary {
+    background: var(--secondary-bg); color: var(--text);
+  }
+
+  .result-score {
+    font-size: 40px; font-weight: 800; text-align: center; margin: 12px 0 4px;
+  }
+  .result-sub {
+    text-align: center; color: var(--hint); margin-bottom: 24px; font-size: 15px;
+  }
+  .center { text-align: center; }
+  .spacer { height: 10px; }
+</style>
+</head>
+<body>
+
+<!-- 1. Bank tanlash -->
+<div id="screen-home" class="screen active">
+  <div class="title">Test banki tanlang</div>
+  <div class="subtitle">Bankdagi barcha savollar tasodifiy tartibda beriladi</div>
+  <div id="bank-list"></div>
+</div>
+
+<!-- 2. Test jarayoni -->
+<div id="screen-quiz" class="screen">
+  <div class="progress-wrap">
+    <span id="progress-label">1 / 15</span>
+    <span id="progress-score">0 ✅</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="q-text" id="q-text"></div>
+  <div id="options"></div>
+</div>
+
+<!-- 3. Natija -->
+<div id="screen-result" class="screen">
+  <div class="title center">Test tugadi!</div>
+  <div class="result-score" id="result-score">0/15</div>
+  <div class="result-sub" id="result-sub"></div>
+  <button class="btn" id="btn-retry">🔁 Yana shu bankdan</button>
+  <button class="btn secondary" id="btn-home">⬅️ Banklarga qaytish</button>
+</div>
+
+<script>
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try {
+    // Ranglar doimiy (qorong'i, yuqori kontrastli) qilib belgilangan -
+    // Telegram temasidagi matn rangiga ishonmaymiz, chunki ba'zi
+    // mijozlarda u yetarlicha yorqin kelmaydi va matn kechasi
+    // o'qilmay qoladi. Faqat tugma rangini temadan olamiz.
+    const tp = tg.themeParams || {};
+    const root = document.documentElement.style;
+    const hex = (v, fallback) => (v ? '#' + v : fallback);
+    root.setProperty('--button', hex(tp.button_color, '#2ea6ff'));
+    root.setProperty('--button-text', hex(tp.button_text_color, '#ffffff'));
+  } catch (e) {}
+}
+
+const BANKS = [
+  { key: 'bio', title: 'Biologiya (mikroskop, hujayra)', file: 'bio.json' },
+  { key: 'chem', title: "Kimyo/Biokimyo (elementlar, eritmalar)", file: 'chem.json' },
+];
+const QUIZ_LEN = null; // null = bankdagi barcha savollar
+
+let questionBanks = {};
+let session = [];
+let idx = 0;
+let score = 0;
+let currentBankKey = null;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function loadBanks() {
+  const listEl = document.getElementById('bank-list');
+  listEl.innerHTML = '<div class="subtitle">Yuklanmoqda...</div>';
+  for (const b of BANKS) {
+    try {
+      const res = await fetch(b.file);
+      const data = await res.json();
+      questionBanks[b.key] = data;
+    } catch (e) {
+      questionBanks[b.key] = [];
+    }
+  }
+  renderBankList();
+}
+
+function renderBankList() {
+  const listEl = document.getElementById('bank-list');
+  listEl.innerHTML = '';
+  BANKS.forEach(b => {
+    const count = (questionBanks[b.key] || []).length;
+    const card = document.createElement('div');
+    card.className = 'bank-card';
+    card.innerHTML = `<div class="bank-title">${b.title}</div><div class="bank-count">${count} ta savol</div>`;
+    card.onclick = () => startQuiz(b.key);
+    listEl.appendChild(card);
+  });
+}
+
+function startQuiz(bankKey) {
+  currentBankKey = bankKey;
+  const pool = questionBanks[bankKey] || [];
+  const n = QUIZ_LEN === null ? pool.length : Math.min(QUIZ_LEN, pool.length);
+  const chosen = shuffle(pool).slice(0, n);
+  session = chosen.map(item => ({
+    q: item.q,
+    options: shuffle(item.options),
+    correct: item.correct,
+  }));
+  idx = 0;
+  score = 0;
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const item = session[idx];
+  document.getElementById('progress-label').textContent = `${idx + 1} / ${session.length}`;
+  document.getElementById('progress-score').textContent = `${score} ✅`;
+  document.getElementById('progress-fill').style.width = `${(idx / session.length) * 100}%`;
+  document.getElementById('q-text').textContent = item.q;
+
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = '';
+  item.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(opt, btn);
+    optsEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(chosenOpt, btnEl) {
+  const item = session[idx];
+  const allBtns = document.querySelectorAll('#options .option');
+  allBtns.forEach(b => b.classList.add('disabled'));
+
+  const isCorrect = chosenOpt.trim() === item.correct.trim();
+  if (isCorrect) {
+    score++;
+    btnEl.classList.add('correct');
+    if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success');
+  } else {
+    btnEl.classList.add('wrong');
+    allBtns.forEach(b => {
+      if (b.textContent.trim() === item.correct.trim()) b.classList.add('correct');
+    });
+    if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('error');
+  }
+
+  setTimeout(() => {
+    idx++;
+    if (idx >= session.length) {
+      finishQuiz();
+    } else {
+      renderQuestion();
+    }
+  }, 700);
+}
+
+function finishQuiz() {
+  const pct = Math.round((score / session.length) * 100);
+  document.getElementById('result-score').textContent = `${score}/${session.length}`;
+  document.getElementById('result-sub').textContent = `${pct}% to'g'ri javob`;
+  showScreen('screen-result');
+}
+
+document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey);
+document.getElementById('btn-home').onclick = () => showScreen('screen-home');
+
+loadBanks();
+</script>
+</body>
+</html>

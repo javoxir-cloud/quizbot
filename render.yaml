@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: quizbot
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python quizbot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: WEBAPP_URL
+        sync: false
