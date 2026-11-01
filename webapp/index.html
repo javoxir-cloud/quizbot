@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Test</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="gen_math.js"></script>
+<script src="gen_physics.js"></script>
+<script src="gen_english.js"></script>
 <style>
   :root {
     --bg: #12181f;
@@ -112,6 +115,22 @@
   }
   .center { text-align: center; }
   .spacer { height: 10px; }
+
+  .topic-card {
+    background: var(--secondary-bg);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border-left: 5px solid #34c759;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .topic-card .topic-title { font-weight: 600; font-size: 15px; }
+  .topic-card .topic-count { color: var(--hint); font-size: 13px; }
+  .back-link {
+    color: var(--hint); font-size: 14px; margin-bottom: 14px; cursor: pointer; display: inline-block;
+  }
 </style>
 </head>
 <body>
@@ -121,6 +140,14 @@
   <div class="title">Test banki tanlang</div>
   <div class="subtitle">Bankdagi barcha savollar tasodifiy tartibda beriladi</div>
   <div id="bank-list"></div>
+</div>
+
+<!-- 1.5. Mavzu tanlash -->
+<div id="screen-topics" class="screen">
+  <div class="back-link" id="topics-back">⬅️ Banklarga qaytish</div>
+  <div class="title" id="topics-title">Mavzu tanlang</div>
+  <div class="subtitle">Mavzuni tanlang yoki barcha savollardan test ishlang</div>
+  <div id="topic-list"></div>
 </div>
 
 <!-- 2. Test jarayoni -->
@@ -150,6 +177,10 @@ if (tg) {
   tg.ready();
   tg.expand();
   try {
+    // Ranglar doimiy (qorong'i, yuqori kontrastli) qilib belgilangan -
+    // Telegram temasidagi matn rangiga ishonmaymiz, chunki ba'zi
+    // mijozlarda u yetarlicha yorqin kelmaydi va matn kechasi
+    // o'qilmay qoladi. Faqat tugma rangini temadan olamiz.
     const tp = tg.themeParams || {};
     const root = document.documentElement.style;
     const hex = (v, fallback) => (v ? '#' + v : fallback);
@@ -161,15 +192,15 @@ if (tg) {
 const BANKS = [
   { key: 'bio', title: 'Biologiya (mikroskop, hujayra)', file: 'bio.json' },
   { key: 'chem', title: "Kimyo/Biokimyo (elementlar, eritmalar)", file: 'chem.json' },
-  { key: 'fizika_uz', title: "Fizika (o'zbek tilida)", file: 'fizika_uz.json' },
-  { key: 'fizika_ru', title: "Физика (на русском)", file: 'fizika_ru.json' },
-  { key: 'matematika_uz', title: "Matematika (o'zbek tilida)", file: 'matematika_uz.json' },
-  { key: 'matematika_ru', title: "Математика (на русском)", file: 'matematika_ru.json' },
+  { key: 'fizika_uz', title: "Fizika (o'zbek tilida)", gen: () => genPhysicsBank('uz') },
+  { key: 'fizika_ru', title: "Физика (на русском)", gen: () => genPhysicsBank('ru') },
+  { key: 'matematika_uz', title: "Matematika (o'zbek tilida)", gen: () => genMathBank('uz') },
+  { key: 'matematika_ru', title: "Математика (на русском)", gen: () => genMathBank('ru') },
   { key: 'tarix_uz', title: "Tarix (o'zbek tilida)", file: 'tarix_uz.json' },
   { key: 'tarix_ru', title: "История (на русском)", file: 'tarix_ru.json' },
-  { key: 'ingliz_uz', title: "Ingliz tili (savol o'zbekcha)", file: 'ingliz_uz.json' },
-  { key: 'ingliz_ru', title: "Английский язык (вопрос по-русски)", file: 'ingliz_ru.json' },
-  { key: 'ingliz_en', title: "English (fully in English)", file: 'ingliz_en.json' },
+  { key: 'ingliz_uz', title: "Ingliz tili (savol o'zbekcha)", gen: () => genEnglishBank('uz') },
+  { key: 'ingliz_ru', title: "Английский язык (вопрос по-русски)", gen: () => genEnglishBank('ru') },
+  { key: 'ingliz_en', title: "English (fully in English)", gen: () => genEnglishBank('en') },
 ];
 const QUIZ_LEN = null; // null = bankdagi barcha savollar
 
@@ -178,6 +209,7 @@ let session = [];
 let idx = 0;
 let score = 0;
 let currentBankKey = null;
+let currentTopic = null;
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -198,9 +230,13 @@ async function loadBanks() {
   listEl.innerHTML = '<div class="subtitle">Yuklanmoqda...</div>';
   for (const b of BANKS) {
     try {
-      const res = await fetch(b.file);
-      const data = await res.json();
-      questionBanks[b.key] = data;
+      if (b.gen) {
+        questionBanks[b.key] = b.gen();
+      } else {
+        const res = await fetch(b.file);
+        const data = await res.json();
+        questionBanks[b.key] = data;
+      }
     } catch (e) {
       questionBanks[b.key] = [];
     }
@@ -216,14 +252,55 @@ function renderBankList() {
     const card = document.createElement('div');
     card.className = 'bank-card';
     card.innerHTML = `<div class="bank-title">${b.title}</div><div class="bank-count">${count} ta savol</div>`;
-    card.onclick = () => startQuiz(b.key);
+    card.onclick = () => openBank(b.key);
     listEl.appendChild(card);
   });
 }
 
-function startQuiz(bankKey) {
+function openBank(bankKey) {
   currentBankKey = bankKey;
   const pool = questionBanks[bankKey] || [];
+  const hasTopics = pool.length > 0 && pool.every(it => !!it.topic);
+  if (hasTopics) {
+    showTopics(bankKey);
+  } else {
+    startQuiz(bankKey, null);
+  }
+}
+
+function showTopics(bankKey) {
+  const pool = questionBanks[bankKey] || [];
+  const bankInfo = BANKS.find(b => b.key === bankKey);
+  document.getElementById('topics-title').textContent = bankInfo ? bankInfo.title : 'Mavzu tanlang';
+
+  const counts = {};
+  pool.forEach(it => { counts[it.topic] = (counts[it.topic] || 0) + 1; });
+
+  const listEl = document.getElementById('topic-list');
+  listEl.innerHTML = '';
+
+  const allCard = document.createElement('div');
+  allCard.className = 'topic-card';
+  allCard.innerHTML = `<span class="topic-title">📚 Barcha mavzular</span><span class="topic-count">${pool.length} ta</span>`;
+  allCard.onclick = () => startQuiz(bankKey, null);
+  listEl.appendChild(allCard);
+
+  Object.keys(counts).forEach(topic => {
+    const card = document.createElement('div');
+    card.className = 'topic-card';
+    card.innerHTML = `<span class="topic-title">${topic}</span><span class="topic-count">${counts[topic]} ta</span>`;
+    card.onclick = () => startQuiz(bankKey, topic);
+    listEl.appendChild(card);
+  });
+
+  showScreen('screen-topics');
+}
+
+function startQuiz(bankKey, topic) {
+  currentBankKey = bankKey;
+  currentTopic = topic;
+  let pool = questionBanks[bankKey] || [];
+  if (topic) pool = pool.filter(it => it.topic === topic);
   const n = QUIZ_LEN === null ? pool.length : Math.min(QUIZ_LEN, pool.length);
   const chosen = shuffle(pool).slice(0, n);
   session = chosen.map(item => ({
@@ -300,8 +377,9 @@ function finishQuiz() {
 }
 
 document.getElementById('btn-next').onclick = goNext;
-document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey);
+document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey, currentTopic);
 document.getElementById('btn-home').onclick = () => showScreen('screen-home');
+document.getElementById('topics-back').onclick = () => showScreen('screen-home');
 
 loadBanks();
 </script>
