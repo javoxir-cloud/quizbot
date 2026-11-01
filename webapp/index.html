@@ -41,6 +41,13 @@
   .bank-card:nth-of-type(2) { border-left-color: #34c759; }
   .bank-card:nth-of-type(3) { border-left-color: #ff9f0a; }
   .bank-card:nth-of-type(4) { border-left-color: #ff375f; }
+  .bank-card:nth-of-type(5) { border-left-color: #af52de; }
+  .bank-card:nth-of-type(6) { border-left-color: #00c7be; }
+  .bank-card:nth-of-type(7) { border-left-color: #ffd60a; }
+  .bank-card:nth-of-type(8) { border-left-color: #bf5af2; }
+  .bank-card:nth-of-type(9) { border-left-color: #32ade6; }
+  .bank-card:nth-of-type(10) { border-left-color: #ff6482; }
+  .bank-card:nth-of-type(11) { border-left-color: #30d158; }
   .bank-card:active { transform: scale(0.98); }
   .bank-card .bank-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
   .bank-card .bank-count { color: var(--hint); font-size: 13px; }
@@ -142,10 +149,6 @@ if (tg) {
   tg.ready();
   tg.expand();
   try {
-    // Ranglar doimiy (qorong'i, yuqori kontrastli) qilib belgilangan -
-    // Telegram temasidagi matn rangiga ishonmaymiz, chunki ba'zi
-    // mijozlarda u yetarlicha yorqin kelmaydi va matn kechasi
-    // o'qilmay qoladi. Faqat tugma rangini temadan olamiz.
     const tp = tg.themeParams || {};
     const root = document.documentElement.style;
     const hex = (v, fallback) => (v ? '#' + v : fallback);
@@ -157,8 +160,17 @@ if (tg) {
 const BANKS = [
   { key: 'bio', title: 'Biologiya (mikroskop, hujayra)', file: 'bio.json' },
   { key: 'chem', title: "Kimyo/Biokimyo (elementlar, eritmalar)", file: 'chem.json' },
+  { key: 'fizika_uz', title: "Fizika (o'zbek tilida)", file: 'fizika_uz.json' },
+  { key: 'fizika_ru', title: "Физика (на русском)", file: 'fizika_ru.json' },
+  { key: 'matematika_uz', title: "Matematika (o'zbek tilida)", file: 'matematika_uz.json' },
+  { key: 'matematika_ru', title: "Математика (на русском)", file: 'matematika_ru.json' },
+  { key: 'tarix_uz', title: "Tarix (o'zbek tilida)", file: 'tarix_uz.json' },
+  { key: 'tarix_ru', title: "История (на русском)", file: 'tarix_ru.json' },
+  { key: 'ingliz_uz', title: "Ingliz tili (savol o'zbekcha)", file: 'ingliz_uz.json' },
+  { key: 'ingliz_ru', title: "Английский язык (вопрос по-русски)", file: 'ingliz_ru.json' },
+  { key: 'ingliz_en', title: "English (fully in English)", file: 'ingliz_en.json' },
 ];
-const QUIZ_LEN = null; // null = bankdagi barcha savollar
+const QUIZ_LEN = null;
 
 let questionBanks = {};
 let session = [];
