@@ -132,6 +132,7 @@
   <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
   <div class="q-text" id="q-text"></div>
   <div id="options"></div>
+  <button class="btn" id="btn-next" style="display:none;">Keyingi savol ➡️</button>
 </div>
 
 <!-- 3. Natija -->
@@ -170,7 +171,7 @@ const BANKS = [
   { key: 'ingliz_ru', title: "Английский язык (вопрос по-русски)", file: 'ingliz_ru.json' },
   { key: 'ingliz_en', title: "English (fully in English)", file: 'ingliz_en.json' },
 ];
-const QUIZ_LEN = null;
+const QUIZ_LEN = null; // null = bankdagi barcha savollar
 
 let questionBanks = {};
 let session = [];
@@ -242,6 +243,7 @@ function renderQuestion() {
   document.getElementById('progress-score').textContent = `${score} ✅`;
   document.getElementById('progress-fill').style.width = `${(idx / session.length) * 100}%`;
   document.getElementById('q-text').textContent = item.q;
+  document.getElementById('btn-next').style.display = 'none';
 
   const optsEl = document.getElementById('options');
   optsEl.innerHTML = '';
@@ -272,14 +274,22 @@ function selectAnswer(chosenOpt, btnEl) {
     if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('error');
   }
 
-  setTimeout(() => {
-    idx++;
-    if (idx >= session.length) {
-      finishQuiz();
-    } else {
-      renderQuestion();
-    }
-  }, 700);
+  document.getElementById('progress-score').textContent = `${score} ✅`;
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = (idx + 1 >= session.length) ? "Natijani ko'rish 🏁" : 'Keyingi savol ➡️';
+  nextBtn.style.display = 'block';
+}
+
+function goNext() {
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.style.display = 'none';
+  idx++;
+  if (idx >= session.length) {
+    finishQuiz();
+  } else {
+    renderQuestion();
+  }
 }
 
 function finishQuiz() {
@@ -289,6 +299,7 @@ function finishQuiz() {
   showScreen('screen-result');
 }
 
+document.getElementById('btn-next').onclick = goNext;
 document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey);
 document.getElementById('btn-home').onclick = () => showScreen('screen-home');
 
