@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Test</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="gen_math.js"></script>
-<script src="gen_physics.js"></script>
-<script src="gen_english.js"></script>
 <style>
   :root {
     --bg: #12181f;
@@ -44,13 +41,6 @@
   .bank-card:nth-of-type(2) { border-left-color: #34c759; }
   .bank-card:nth-of-type(3) { border-left-color: #ff9f0a; }
   .bank-card:nth-of-type(4) { border-left-color: #ff375f; }
-  .bank-card:nth-of-type(5) { border-left-color: #af52de; }
-  .bank-card:nth-of-type(6) { border-left-color: #00c7be; }
-  .bank-card:nth-of-type(7) { border-left-color: #ffd60a; }
-  .bank-card:nth-of-type(8) { border-left-color: #bf5af2; }
-  .bank-card:nth-of-type(9) { border-left-color: #32ade6; }
-  .bank-card:nth-of-type(10) { border-left-color: #ff6482; }
-  .bank-card:nth-of-type(11) { border-left-color: #30d158; }
   .bank-card:active { transform: scale(0.98); }
   .bank-card .bank-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
   .bank-card .bank-count { color: var(--hint); font-size: 13px; }
@@ -115,22 +105,6 @@
   }
   .center { text-align: center; }
   .spacer { height: 10px; }
-
-  .topic-card {
-    background: var(--secondary-bg);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    border-left: 5px solid #34c759;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .topic-card .topic-title { font-weight: 600; font-size: 15px; }
-  .topic-card .topic-count { color: var(--hint); font-size: 13px; }
-  .back-link {
-    color: var(--hint); font-size: 14px; margin-bottom: 14px; cursor: pointer; display: inline-block;
-  }
 </style>
 </head>
 <body>
@@ -142,14 +116,6 @@
   <div id="bank-list"></div>
 </div>
 
-<!-- 1.5. Mavzu tanlash -->
-<div id="screen-topics" class="screen">
-  <div class="back-link" id="topics-back">⬅️ Banklarga qaytish</div>
-  <div class="title" id="topics-title">Mavzu tanlang</div>
-  <div class="subtitle">Mavzuni tanlang yoki barcha savollardan test ishlang</div>
-  <div id="topic-list"></div>
-</div>
-
 <!-- 2. Test jarayoni -->
 <div id="screen-quiz" class="screen">
   <div class="progress-wrap">
@@ -159,7 +125,6 @@
   <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
   <div class="q-text" id="q-text"></div>
   <div id="options"></div>
-  <button class="btn" id="btn-next" style="display:none;">Keyingi savol ➡️</button>
 </div>
 
 <!-- 3. Natija -->
@@ -189,24 +154,48 @@ if (tg) {
   } catch (e) {}
 }
 
-const TG_USER = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
-
 const BANKS = [
   { key: 'bio', title: 'Biologiya (mikroskop, hujayra)', file: 'bio.json' },
   { key: 'chem', title: "Kimyo/Biokimyo (elementlar, eritmalar)", file: 'chem.json' },
-  { key: 'fizika_uz', title: "Fizika (o'zbek tilida)", gen: () => genPhysicsBank('uz') },
-  { key: 'fizika_ru', title: "Физика (на русском)", gen: () => genPhysicsBank('ru') },
-  { key: 'matematika_uz', title: "Matematika (o'zbek tilida)", gen: () => genMathBank('uz') },
-  { key: 'matematika_ru', title: "Математика (на русском)", gen: () => genMathBank('ru') },
-  { key: 'tarix_uz', title: "Tarix (o'zbek tilida)", file: 'tarix_uz.json' },
-  { key: 'tarix_ru', title: "История (на русском)", file: 'tarix_ru.json' },
-  { key: 'ingliz_uz', title: "Ingliz tili (savol o'zbekcha)", gen: () => genEnglishBank('uz') },
-  { key: 'ingliz_ru', title: "Английский язык (вопрос по-русски)", gen: () => genEnglishBank('ru') },
-  { key: 'ingliz_en', title: "English (fully in English)", gen: () => genEnglishBank('en') },
+  { key: 'medchem_t1', title: 'Мед.химия — Тема 1 (27 savol)', file: 'medchem_t1.json' },
+  { key: 'medchem_t2', title: 'Мед.химия — Тема 2 (54 savol)', file: 'medchem_t2.json' },
+  { key: 'medchem_t3', title: 'Мед.химия — Тема 3 (60 savol)', file: 'medchem_t3.json' },
+  { key: 'medchem_t4', title: 'Мед.химия — Тема 4 (43 savol)', file: 'medchem_t4.json' },
+  { key: 'medchem_t5', title: 'Мед.химия — Тема 5 (41 savol)', file: 'medchem_t5.json' },
+  { key: 'medchem_t6', title: 'Мед.химия — Тема 6 (35 savol)', file: 'medchem_t6.json' },
+  { key: 'medchem_t7', title: 'Мед.химия — Тема 7 (43 savol)', file: 'medchem_t7.json' },
+  { key: 'medchem_t8', title: 'Мед.химия — Тема 8 (109 savol)', file: 'medchem_t8.json' },
+  { key: 'medchem_t10', title: 'Мед.химия — Тема 10 (32 savol)', file: 'medchem_t10.json' },
+  { key: 'medchem_t11', title: 'Мед.химия — Тема 11 (41 savol)', file: 'medchem_t11.json' },
+  { key: 'medchem_t12', title: 'Мед.химия — Тема 12 (10 savol)', file: 'medchem_t12.json' },
+  { key: 'medchem_t13', title: 'Мед.химия — Тема 13 (36 savol)', file: 'medchem_t13.json' },
+  { key: 'medchem_t14', title: 'Мед.химия — Тема 14 (30 savol)', file: 'medchem_t14.json' },
+  { key: 'medchem_t15', title: 'Мед.химия — Тема 15 (22 savol)', file: 'medchem_t15.json' },
+  { key: 'medchem_t16', title: 'Мед.химия — Тема 16 (22 savol)', file: 'medchem_t16.json' },
+  { key: 'medchem_t17', title: 'Мед.химия — Тема 17 (30 savol)', file: 'medchem_t17.json' },
+  { key: 'medchem_t18', title: 'Мед.химия — Тема 18 (40 savol)', file: 'medchem_t18.json' },
+  { key: 'medchem_t19', title: 'Мед.химия — Тема 19 (37 savol)', file: 'medchem_t19.json' },
+  { key: 'medchem_t20', title: 'Мед.химия — Тема 20 (30 savol)', file: 'medchem_t20.json' },
+  { key: 'medchem_t21', title: 'Мед.химия — Тема 21 (30 savol)', file: 'medchem_t21.json' },
+  { key: 'medchem_t22', title: 'Мед.химия — Тема 22 (66 savol)', file: 'medchem_t22.json' },
+  { key: 'medchem_t23', title: 'Мед.химия — Тема 23 (65 savol)', file: 'medchem_t23.json' },
+  { key: 'medbio_t2', title: 'Мед.биология — Тема 2: Вирусы. Про- и эукариотические клетки. Их общее сх…', file: 'medbio_t2.json' },
+  { key: 'medbio_t3', title: 'Мед.биология — Тема 3: Молекулярные основы жизни. Нуклеиновые кислоты и и…', file: 'medbio_t3.json' },
+  { key: 'medbio_t4', title: 'Мед.биология — Тема 4: Жизненный цикл клеток. Митотическое деление клеток…', file: 'medbio_t4.json' },
+  { key: 'medbio_t6', title: 'Мед.биология — Тема 6: Ди- и полигибридное скрещивание. Множественный алл…', file: 'medbio_t6.json' },
+  { key: 'medbio_t7', title: 'Мед.биология — Тема 7: Хромосомная теория наследственности. Т.Г.Морган. С…', file: 'medbio_t7.json' },
+  { key: 'medbio_t8', title: 'Мед.биология — Тема 8: Изменчивость и её виды. Наследственная и ненаследс…', file: 'medbio_t8.json' },
+  { key: 'medbio_t10', title: 'Мед.биология — Тема 10: Методы изучения генетики человека: дерматоглифичес…', file: 'medbio_t10.json' },
+  { key: 'medbio_t12', title: 'Мед.биология — Тема 12: Генные болезни. Медико-генетическое консультирован…', file: 'medbio_t12.json' },
+  { key: 'medbio_t13', title: 'Мед.биология — Тема 13: Общие закономерности проэмбрионального и эмбрионал…', file: 'medbio_t13.json' },
+  { key: 'medbio_t14', title: 'Мед.биология — Тема 14: Онто-филогенез органов систем: покровной, опорно-д…', file: 'medbio_t14.json' },
+  { key: 'medbio_t15', title: 'Мед.биология — Тема 15: . Тип: Жгутиковые- паразиты человека: трипаносома,…', file: 'medbio_t15.json' },
+  { key: 'medbio_t16', title: 'Мед.биология — Тема 16: Споровики паразиты человека. Малярийный плазмодий,…', file: 'medbio_t16.json' },
+  { key: 'medbio_t19', title: 'Мед.биология — Тема 19: Ленточные черви - паразиты человека: широкий ленте…', file: 'medbio_t19.json' },
+  { key: 'medbio_t21', title: 'Мед.биология — Тема 21: Круглые черви: Изучение представителей круглых чер…', file: 'medbio_t21.json' },
+  { key: 'medbio_t23', title: 'Мед.биология — Тема 23: Насекомые имеющие медицинское значение: Вши, клопы…', file: 'medbio_t23.json' },
+  { key: 'medbio_t24', title: 'Мед.биология — Тема 24: Ядовитые животные. Изучение оказания первой помощи…', file: 'medbio_t24.json' },
 ];
-if (TG_USER && TG_USER.id) {
-  BANKS.push({ key: 'mening', title: '📥 Mening savollarim', api: `/api/user_bank?uid=${TG_USER.id}` });
-}
 const QUIZ_LEN = null; // null = bankdagi barcha savollar
 
 let questionBanks = {};
@@ -214,7 +203,6 @@ let session = [];
 let idx = 0;
 let score = 0;
 let currentBankKey = null;
-let currentTopic = null;
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -235,17 +223,9 @@ async function loadBanks() {
   listEl.innerHTML = '<div class="subtitle">Yuklanmoqda...</div>';
   for (const b of BANKS) {
     try {
-      if (b.gen) {
-        questionBanks[b.key] = b.gen();
-      } else if (b.api) {
-        const res = await fetch(b.api);
-        const data = await res.json();
-        questionBanks[b.key] = Array.isArray(data) ? data : [];
-      } else {
-        const res = await fetch(b.file);
-        const data = await res.json();
-        questionBanks[b.key] = data;
-      }
+      const res = await fetch(b.file);
+      const data = await res.json();
+      questionBanks[b.key] = data;
     } catch (e) {
       questionBanks[b.key] = [];
     }
@@ -261,62 +241,14 @@ function renderBankList() {
     const card = document.createElement('div');
     card.className = 'bank-card';
     card.innerHTML = `<div class="bank-title">${b.title}</div><div class="bank-count">${count} ta savol</div>`;
-    card.onclick = () => openBank(b.key);
+    card.onclick = () => startQuiz(b.key);
     listEl.appendChild(card);
   });
 }
 
-function openBank(bankKey) {
+function startQuiz(bankKey) {
   currentBankKey = bankKey;
   const pool = questionBanks[bankKey] || [];
-  if (pool.length === 0) {
-    const msg = bankKey === 'mening'
-      ? "Hali savol yuklamagansiz. Botga /savol_yukla buyrug'ini yuboring - u yerda formatni ko'rsatadi, so'ng .json yoki .txt fayl yuborsangiz, shu bank to'ladi."
-      : "Bu bankda hozircha savollar yo'q.";
-    if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
-    return;
-  }
-  const hasTopics = pool.length > 0 && pool.every(it => !!it.topic);
-  if (hasTopics) {
-    showTopics(bankKey);
-  } else {
-    startQuiz(bankKey, null);
-  }
-}
-
-function showTopics(bankKey) {
-  const pool = questionBanks[bankKey] || [];
-  const bankInfo = BANKS.find(b => b.key === bankKey);
-  document.getElementById('topics-title').textContent = bankInfo ? bankInfo.title : 'Mavzu tanlang';
-
-  const counts = {};
-  pool.forEach(it => { counts[it.topic] = (counts[it.topic] || 0) + 1; });
-
-  const listEl = document.getElementById('topic-list');
-  listEl.innerHTML = '';
-
-  const allCard = document.createElement('div');
-  allCard.className = 'topic-card';
-  allCard.innerHTML = `<span class="topic-title">📚 Barcha mavzular</span><span class="topic-count">${pool.length} ta</span>`;
-  allCard.onclick = () => startQuiz(bankKey, null);
-  listEl.appendChild(allCard);
-
-  Object.keys(counts).forEach(topic => {
-    const card = document.createElement('div');
-    card.className = 'topic-card';
-    card.innerHTML = `<span class="topic-title">${topic}</span><span class="topic-count">${counts[topic]} ta</span>`;
-    card.onclick = () => startQuiz(bankKey, topic);
-    listEl.appendChild(card);
-  });
-
-  showScreen('screen-topics');
-}
-
-function startQuiz(bankKey, topic) {
-  currentBankKey = bankKey;
-  currentTopic = topic;
-  let pool = questionBanks[bankKey] || [];
-  if (topic) pool = pool.filter(it => it.topic === topic);
   const n = QUIZ_LEN === null ? pool.length : Math.min(QUIZ_LEN, pool.length);
   const chosen = shuffle(pool).slice(0, n);
   session = chosen.map(item => ({
@@ -336,7 +268,6 @@ function renderQuestion() {
   document.getElementById('progress-score').textContent = `${score} ✅`;
   document.getElementById('progress-fill').style.width = `${(idx / session.length) * 100}%`;
   document.getElementById('q-text').textContent = item.q;
-  document.getElementById('btn-next').style.display = 'none';
 
   const optsEl = document.getElementById('options');
   optsEl.innerHTML = '';
@@ -367,22 +298,14 @@ function selectAnswer(chosenOpt, btnEl) {
     if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('error');
   }
 
-  document.getElementById('progress-score').textContent = `${score} ✅`;
-
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.textContent = (idx + 1 >= session.length) ? "Natijani ko'rish 🏁" : 'Keyingi savol ➡️';
-  nextBtn.style.display = 'block';
-}
-
-function goNext() {
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.style.display = 'none';
-  idx++;
-  if (idx >= session.length) {
-    finishQuiz();
-  } else {
-    renderQuestion();
-  }
+  setTimeout(() => {
+    idx++;
+    if (idx >= session.length) {
+      finishQuiz();
+    } else {
+      renderQuestion();
+    }
+  }, 700);
 }
 
 function finishQuiz() {
@@ -392,10 +315,8 @@ function finishQuiz() {
   showScreen('screen-result');
 }
 
-document.getElementById('btn-next').onclick = goNext;
-document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey, currentTopic);
+document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey);
 document.getElementById('btn-home').onclick = () => showScreen('screen-home');
-document.getElementById('topics-back').onclick = () => showScreen('screen-home');
 
 loadBanks();
 </script>
