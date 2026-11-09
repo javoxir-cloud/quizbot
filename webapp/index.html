@@ -264,7 +264,7 @@ function shuffle(arr) {
 async function loadBanks() {
   const listEl = document.getElementById('bank-list');
   listEl.innerHTML = '<div class="subtitle">Yuklanmoqda...</div>';
-  for (const b of BANKS) {
+  await Promise.all(BANKS.map(async (b) => {
     try {
       const res = await fetch(b.file);
       const data = await res.json();
@@ -272,7 +272,7 @@ async function loadBanks() {
     } catch (e) {
       questionBanks[b.key] = [];
     }
-  }
+  }));
   renderBankList();
 }
 
