@@ -94,6 +94,13 @@
     font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px;
   }
   .btn-next.show { display: block; }
+  .btn-back {
+    display: block; width: auto; text-align: left;
+    background: transparent; color: var(--hint);
+    border: none; padding: 0; margin-bottom: 14px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .btn-back:active { opacity: 0.6; }
 
   .btn {
     display: block; width: 100%; text-align: center;
@@ -126,6 +133,7 @@
 
 <!-- 2. Test jarayoni -->
 <div id="screen-quiz" class="screen">
+  <button class="btn-back" id="btn-back">⬅️ Menyuga qaytish</button>
   <div class="progress-wrap">
     <span id="progress-label">1 / 15</span>
     <span id="progress-score">0 ✅</span>
@@ -377,6 +385,14 @@ function finishQuiz() {
 
 document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey);
 document.getElementById('btn-home').onclick = () => showScreen('screen-home');
+document.getElementById('btn-back').onclick = () => {
+  const msg = "Test to'xtatilsin va bosh menyuga qaytilsinmi? Joriy progress saqlanmaydi.";
+  if (tg && tg.showConfirm) {
+    tg.showConfirm(msg, (ok) => { if (ok) showScreen('screen-home'); });
+  } else if (confirm(msg)) {
+    showScreen('screen-home');
+  }
+};
 
 loadBanks();
 </script>
