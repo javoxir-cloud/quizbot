@@ -86,6 +86,14 @@
     background: #fde8e8; border-color: #ff3b30; border-left-color: #ff3b30; color: #a3281f;
   }
   .option.disabled { pointer-events: none; }
+  .btn-next {
+    display: none;
+    width: 100%; text-align: center;
+    background: var(--button); color: var(--button-text);
+    border: none; border-radius: 12px; padding: 14px 16px;
+    font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px;
+  }
+  .btn-next.show { display: block; }
 
   .btn {
     display: block; width: 100%; text-align: center;
@@ -125,6 +133,7 @@
   <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
   <div class="q-text" id="q-text"></div>
   <div id="options"></div>
+  <button class="btn-next" id="btn-next">Keyingisi →</button>
 </div>
 
 <!-- 3. Natija -->
@@ -312,6 +321,9 @@ function renderQuestion() {
   document.getElementById('progress-fill').style.width = `${(idx / session.length) * 100}%`;
   document.getElementById('q-text').textContent = item.q;
 
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.classList.remove('show');
+
   const optsEl = document.getElementById('options');
   optsEl.innerHTML = '';
   item.options.forEach(opt => {
@@ -341,14 +353,19 @@ function selectAnswer(chosenOpt, btnEl) {
     if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('error');
   }
 
-  setTimeout(() => {
+  document.getElementById('progress-score').textContent = `${score} ✅`;
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.classList.add('show');
+  nextBtn.textContent = (idx + 1 >= session.length) ? "Yakunlash →" : "Keyingisi →";
+  nextBtn.onclick = () => {
     idx++;
     if (idx >= session.length) {
       finishQuiz();
     } else {
       renderQuestion();
     }
-  }, 700);
+  };
 }
 
 function finishQuiz() {
