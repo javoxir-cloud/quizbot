@@ -278,32 +278,45 @@ function shuffle(arr) {
   return a;
 }
 
-async function loadBanks() {
-  const listEl = document.getElementById('bank-list');
-  listEl.innerHTML = '<div class="subtitle">Yuklanmoqda...</div>';
-  await Promise.all(BANKS.map(async (b) => {
-    try {
-      const res = await fetch(b.file);
-      const data = await res.json();
-      questionBanks[b.key] = data;
-    } catch (e) {
-      questionBanks[b.key] = [];
-    }
-  }));
-  renderBankList();
+// Banklar ochilganda hammasini birdan yuklamaymiz (79 fayl, ~1.2 MB) -
+// ro'yxat darhol chiqadi, faqat tanlangan bank fayli yuklanadi.
+async function fetchBank(bankKey) {
+  if (questionBanks[bankKey]) return questionBanks[bankKey];
+  const b = BANKS.find(x => x.key === bankKey);
+  const res = await fetch(b.file);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  questionBanks[bankKey] = data;
+  return data;
 }
 
 function renderBankList() {
   const listEl = document.getElementById('bank-list');
   listEl.innerHTML = '';
   BANKS.forEach(b => {
-    const count = (questionBanks[b.key] || []).length;
     const card = document.createElement('div');
     card.className = 'bank-card';
-    card.innerHTML = `<div class="bank-title">${b.title}</div><div class="bank-count">${count} ta savol</div>`;
-    card.onclick = () => startQuiz(b.key);
+    card.innerHTML = `<div class="bank-title">${b.title}</div><div class="bank-count"></div>`;
+    card.onclick = () => openBank(b.key, card);
     listEl.appendChild(card);
   });
+}
+
+let loadingBank = false;
+async function openBank(bankKey, card) {
+  if (loadingBank) return;
+  loadingBank = true;
+  const countEl = card.querySelector('.bank-count');
+  countEl.textContent = 'Yuklanmoqda...';
+  try {
+    await fetchBank(bankKey);
+    countEl.textContent = '';
+    startQuiz(bankKey);
+  } catch (e) {
+    countEl.textContent = "Yuklab bo'lmadi, qayta bosing";
+  } finally {
+    loadingBank = false;
+  }
 }
 
 function startQuiz(bankKey) {
@@ -394,7 +407,7 @@ document.getElementById('btn-back').onclick = () => {
   }
 };
 
-loadBanks();
+renderBankList();
 </script>
 </body>
 </html>

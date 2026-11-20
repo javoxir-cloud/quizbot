@@ -1,4 +1,6 @@
 import asyncio
+import gzip
+import hashlib
 import json
 import logging
 import os
@@ -89,23 +91,57 @@ async def fallback(message: Message):
     )
 
 
+_MIME = {".html": "text/html; charset=utf-8", ".json": "application/json; charset=utf-8"}
+_file_cache: Dict[str, tuple] = {}
+
+
+def _load_file(name: str):
+    """Faylni xotiraga oldindan gzip qilib saqlaydi. Fayl o'zgarsa
+    (mtime/hajm), qayta o'qiladi - botni qayta yoqish shart emas."""
+    path = (WEBAPP_DIR / name).resolve()
+    if path.parent != WEBAPP_DIR.resolve() or path.suffix not in _MIME or not path.is_file():
+        return None
+    st = path.stat()
+    key = (st.st_mtime_ns, st.st_size)
+    cached = _file_cache.get(name)
+    if cached and cached[0] == key:
+        return cached
+    raw = path.read_bytes()
+    entry = (key, raw, gzip.compress(raw, 9), '"%s"' % hashlib.md5(raw).hexdigest(), _MIME[path.suffix])
+    _file_cache[name] = entry
+    return entry
+
+
 async def start_webapp_server():
-    """Mini-ilova fayllarini (index.html, bio.json, chem.json) mahalliy
-    serverda xizmat qiladi. Buni ngrok orqali internetga chiqarasiz."""
-    @web.middleware
-    async def no_cache_middleware(request, handler):
-        response = await handler(request)
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        response.headers["Pragma"] = "no-cache"
-        return response
+    """Mini-ilova fayllarini (index.html va savol banklari *.json) xizmat
+    qiladi. Fayllar gzip bilan siqilib (~4-5 barobar kichik) yuboriladi,
+    JSON banklar brauzer keshida saqlanadi (ETag bilan - o'zgarmagan bo'lsa
+    qayta yuklanmaydi)."""
 
-    app = web.Application(middlewares=[no_cache_middleware])
+    async def serve(request):
+        name = request.match_info.get("name") or "index.html"
+        entry = _load_file(name)
+        if entry is None:
+            raise web.HTTPNotFound()
+        _, raw, gz, etag, mime = entry
+        headers = {"ETag": etag, "Vary": "Accept-Encoding"}
+        if name.endswith(".json"):
+            headers["Cache-Control"] = "no-cache"
+        else:
+            headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            headers["Pragma"] = "no-cache"
+        if request.headers.get("If-None-Match") == etag:
+            return web.Response(status=304, headers=headers)
+        body = raw
+        if "gzip" in request.headers.get("Accept-Encoding", ""):
+            body = gz
+            headers["Content-Encoding"] = "gzip"
+        headers["Content-Type"] = mime
+        return web.Response(body=body, headers=headers)
 
-    async def index(request):
-        return web.FileResponse(WEBAPP_DIR / "index.html")
-
-    app.router.add_get("/", index)
-    app.router.add_static("/", str(WEBAPP_DIR), show_index=False)
+    app = web.Application()
+    app.router.add_get("/", serve)
+    app.router.add_get("/{name}", serve)
 
     runner = web.AppRunner(app)
     await runner.setup()
