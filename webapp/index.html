@@ -573,12 +573,47 @@ let questionBanks = {};
 let currentBankKey = null;
 let subjectFilter = 'all';
 
+// Savollar server orqali, Telegram imzosi (initData) bilan olinadi -
+// server ruxsatni tekshiradi, ruxsati yo'qlarga savollar berilmaydi.
+const INIT_DATA = (tg && tg.initData) || '';
+function api(path) { return fetch(path, { headers: { 'X-Init-Data': INIT_DATA } }); }
+
+function showLocked(reason) {
+  const box = $('bank-list');
+  $('home-summary').innerHTML = '';
+  $('subject-chips').innerHTML = '';
+  $('bank-search').classList.add('hidden');
+  box.innerHTML = '';
+  const msg = reason === 'auth'
+    ? "Ilovani Telegram bot ichidan oching."
+    : "⛔ Sizga hali ruxsat berilmagan.\n\nBotga /start yuboring — so'rovingiz adminga boradi. Ruxsat berilgach, ilovani qayta oching.";
+  const e = el('div', 'empty', msg);
+  e.style.whiteSpace = 'pre-line';
+  e.style.fontSize = '16px';
+  box.appendChild(e);
+  if (reason !== 'auth' && tg && tg.close) {
+    const b = el('button', 'btn', 'Botga qaytish');
+    b.onclick = () => tg.close();
+    box.appendChild(b);
+  }
+}
+
 async function loadBanks() {
   $('bank-list').innerHTML = '<div class="empty">Yuklanmoqda...</div>';
+  try {
+    const me = await api('/api/me');
+    if (!me.ok) {
+      const j = await me.json().catch(() => ({}));
+      return showLocked(j.reason || 'denied');
+    }
+  } catch (e) {
+    $('bank-list').innerHTML = '<div class="empty">Server bilan aloqa yo\'q. Birozdan keyin qayta oching.</div>';
+    return;
+  }
   await Promise.all(BANKS.map(async (b) => {
     try {
-      const res = await fetch(b.file);
-      questionBanks[b.key] = await res.json();
+      const res = await api('/api/bank/' + b.key);
+      questionBanks[b.key] = res.ok ? await res.json() : [];
     } catch (e) {
       questionBanks[b.key] = [];
     }

@@ -90,3 +90,16 @@ MUHIM ESLATMALAR:
 webapp/ papkasida index.html, bio.json va chem.json - bular
 Mini-ilova uchun, botning ichki veb-serveri shu papkani xizmat
 qiladi.
+
+
+=== RUXSAT TIZIMI (faqat admin ruxsat berganlar ishlatadi) ===
+
+Render -> Environment ga qo'shiladi:
+  ADMIN_IDS=123456789        (o'zingizning Telegram ID; bir nechta bo'lsa vergul bilan)
+  DATABASE_URL=postgresql://...   (Neon/Supabase bepul bazasi - ruxsatlar shu yerda saqlanadi)
+
+Ishlashi:
+  - Yangi odam /start bosadi -> adminga "✅ Muddatsiz / ✅ 30 kun / ❌ Rad etish" tugmali xabar keladi.
+  - Admin buyruqlari: /admin, /users, /pending, /add ID [kun], /remove ID, /myid
+  - Savollar (data/*.json) endi ochiq emas: Mini App ularni /api/bank/... orqali,
+    Telegram imzosi (initData) tekshirilgandan va ruxsat bor bo'lsagina oladi.
