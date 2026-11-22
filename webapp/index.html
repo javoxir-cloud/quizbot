@@ -8,149 +8,314 @@
 <style>
   :root {
     --bg: #12181f;
+    --card: #1b242e;
+    --card2: #243140;
     --text: #ffffff;
-    --hint: #aab4bf;
+    --hint: #9aa6b2;
     --button: #2ea6ff;
     --button-text: #ffffff;
-    --secondary-bg: #1f2a36;
+    --ok: #34c759;
+    --ok-bg: rgba(52,199,89,0.16);
+    --bad: #ff453a;
+    --bad-bg: rgba(255,69,58,0.16);
+    --line: rgba(255,255,255,0.08);
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    margin: 0; padding: 0;
-    background: var(--bg);
-    color: var(--text);
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
   }
-  .screen { display: none; padding: 16px; max-width: 560px; margin: 0 auto; }
+  button { font-family: inherit; }
+  .screen { display: none; padding: 14px 14px 110px; max-width: 560px; margin: 0 auto; }
   .screen.active { display: block; }
+  .hidden { display: none !important; }
 
-  .title { font-size: 22px; font-weight: 700; margin: 8px 0 4px; }
-  .subtitle { color: var(--hint); font-size: 14px; margin-bottom: 20px; }
+  .title { font-size: 22px; font-weight: 700; margin: 6px 0 4px; }
+  .subtitle { color: var(--hint); font-size: 14px; margin-bottom: 14px; }
+  .muted { color: var(--hint); }
+
+  /* ---------- Bosh sahifa ---------- */
+  .search {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); font-size: 15px; outline: none; margin-bottom: 10px;
+  }
+  .chips-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; scrollbar-width: none; }
+  .chips-row::-webkit-scrollbar { display: none; }
+  .fchip {
+    flex: 0 0 auto; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); font-size: 13px; cursor: pointer;
+  }
+  .fchip.active { background: var(--button); border-color: var(--button); color: var(--button-text); }
 
   .bank-card {
-    background: var(--secondary-bg);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: transform .08s ease;
-    border-left: 5px solid #5b8def;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    background: var(--card); border-radius: 16px; padding: 14px 14px 12px; margin-bottom: 10px;
+    cursor: pointer; border-top: 4px solid #5b8def; transition: transform .08s ease;
   }
-  .bank-card:nth-of-type(2) { border-left-color: #34c759; }
-  .bank-card:nth-of-type(3) { border-left-color: #ff9f0a; }
-  .bank-card:nth-of-type(4) { border-left-color: #ff375f; }
-  .bank-card:active { transform: scale(0.98); }
-  .bank-card .bank-title { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
-  .bank-card .bank-count { color: var(--hint); font-size: 13px; }
+  .bank-card[data-subj="chem"] { border-top-color: #34c759; }
+  .bank-card[data-subj="medchem"] { border-top-color: #ff9f0a; }
+  .bank-card[data-subj="medbio"] { border-top-color: #ff375f; }
+  .bank-card:active { transform: scale(0.985); }
+  .bank-title { font-weight: 600; font-size: 16px; line-height: 1.3; margin-bottom: 10px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12.5px;
+    color: var(--text); background: rgba(255,255,255,0.03); white-space: nowrap;
+  }
+  .mini-bar { height: 4px; border-radius: 2px; background: var(--card2); margin-top: 10px; overflow: hidden; display: flex; }
+  .mini-bar .ok { background: var(--ok); }
+  .mini-bar .bad { background: var(--bad); }
 
-  .progress-wrap {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 14px; font-size: 13px; color: var(--hint);
+  .summary {
+    display: flex; gap: 8px; margin-bottom: 12px;
   }
-  .progress-bar {
-    height: 6px; background: var(--secondary-bg); border-radius: 3px;
-    overflow: hidden; margin-bottom: 18px;
-    border: 1px solid rgba(128,128,128,0.25);
-  }
-  .progress-fill {
-    height: 100%; background: var(--button); width: 0%;
-    transition: width .25s ease;
-  }
+  .summary > div { flex: 1; background: var(--card); border-radius: 12px; padding: 10px; text-align: center; }
+  .summary b { display: block; font-size: 18px; }
+  .summary span { font-size: 11.5px; color: var(--hint); }
 
-  .q-text {
-    font-size: 18px; font-weight: 600; line-height: 1.4;
-    margin-bottom: 20px; min-height: 60px;
+  /* ---------- Bottom sheet ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50;
+    display: none; align-items: flex-end; justify-content: center;
   }
+  .overlay.show { display: flex; }
+  .sheet {
+    background: var(--card); width: 100%; max-width: 560px; border-radius: 20px 20px 0 0;
+    padding: 16px 16px 24px; max-height: 92vh; overflow-y: auto;
+    animation: up .18s ease;
+  }
+  @keyframes up { from { transform: translateY(40px); opacity: .5; } to { transform: none; opacity: 1; } }
+  .sheet-head { display: flex; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+  .sheet-head .t { flex: 1; font-size: 18px; font-weight: 700; line-height: 1.3; }
+  .x-btn { border: none; background: var(--card2); color: var(--text); width: 36px; height: 36px; border-radius: 10px; font-size: 18px; cursor: pointer; }
+  .menu-item {
+    display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 4px; background: none; border: none;
+    color: var(--text); font-size: 16px; text-align: left; cursor: pointer; border-bottom: 1px solid var(--line);
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item .ic { width: 26px; text-align: center; font-size: 19px; }
+  .menu-item small { display: block; color: var(--hint); font-size: 12.5px; margin-top: 2px; }
+  .menu-item.danger { color: var(--bad); }
 
-  .option {
-    display: block; width: 100%; text-align: left;
-    background: var(--secondary-bg); color: var(--text);
-    border: 1px solid transparent; border-left: 5px solid #5b8def;
-    border-radius: 12px;
-    padding: 14px 16px; margin-bottom: 10px;
-    font-size: 15px; cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    transition: background .15s ease, border-color .15s ease, transform .08s ease;
+  .form-label { font-size: 15px; font-weight: 600; margin: 14px 0 8px; }
+  .radio-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; cursor: pointer; }
+  .radio-row input[type=radio], .check-row input { width: 20px; height: 20px; accent-color: var(--button); flex: 0 0 auto; }
+  .radio-body { flex: 1; }
+  .inp, .sel {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card2); color: var(--text); font-size: 15px; outline: none;
   }
-  .option:nth-of-type(4n+1) { border-left-color: #5b8def; }
-  .option:nth-of-type(4n+2) { border-left-color: #34c759; }
-  .option:nth-of-type(4n+3) { border-left-color: #ff9f0a; }
-  .option:nth-of-type(4n+4) { border-left-color: #ff375f; }
-  .option:active { transform: scale(0.99); }
-  .option.correct {
-    background: #e3f9e5; border-color: #34c759; border-left-color: #34c759; color: #1a7a2e;
-  }
-  .option.wrong {
-    background: #fde8e8; border-color: #ff3b30; border-left-color: #ff3b30; color: #a3281f;
-  }
-  .option.disabled { pointer-events: none; }
-  .btn-next {
-    display: none;
-    width: 100%; text-align: center;
-    background: var(--button); color: var(--button-text);
-    border: none; border-radius: 12px; padding: 14px 16px;
-    font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px;
-  }
-  .btn-next.show { display: block; }
-  .btn-back {
-    display: block; width: auto; text-align: left;
-    background: transparent; color: var(--hint);
-    border: none; padding: 0; margin-bottom: 14px;
-    font-size: 14px; font-weight: 600; cursor: pointer;
-  }
-  .btn-back:active { opacity: 0.6; }
+  .inp:disabled, .sel:disabled { opacity: .45; }
+  .two { display: flex; gap: 10px; }
+  .two > div { flex: 1; }
+  .two small { color: var(--hint); font-size: 12px; }
+  .check-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; cursor: pointer; font-size: 15px; }
+  .check-row .cnt { margin-left: auto; color: var(--hint); font-size: 13px; }
+  .check-row.off { opacity: .45; pointer-events: none; }
+  .pool-info { margin-top: 10px; font-size: 13.5px; color: var(--hint); }
 
   .btn {
-    display: block; width: 100%; text-align: center;
-    background: var(--button); color: var(--button-text);
-    border: none; border-radius: 12px; padding: 14px 16px;
-    font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px;
+    display: block; width: 100%; text-align: center; background: var(--button); color: var(--button-text);
+    border: none; border-radius: 12px; padding: 14px 16px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px;
   }
-  .btn.secondary {
-    background: var(--secondary-bg); color: var(--text);
-  }
+  .btn.secondary { background: var(--card2); color: var(--text); }
+  .btn.outline { background: transparent; border: 1px solid var(--button); color: var(--button); }
+  .btn:disabled { opacity: .45; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
 
-  .result-score {
-    font-size: 40px; font-weight: 800; text-align: center; margin: 12px 0 4px;
+  /* ---------- Test ---------- */
+  .q-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .icon-btn { border: none; background: var(--card); color: var(--text); width: 40px; height: 40px; border-radius: 12px; font-size: 18px; cursor: pointer; flex: 0 0 auto; }
+  .q-header .mid { flex: 1; min-width: 0; }
+  .q-header .mode { font-size: 12.5px; color: var(--hint); }
+  .q-header .bt { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-header .right { text-align: right; font-size: 13px; color: var(--hint); flex: 0 0 auto; }
+  .timer { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .timer.low { color: var(--bad); }
+
+  .nav-strip { position: relative; display: flex; gap: 6px; overflow-x: auto; padding: 4px 2px 10px; margin-bottom: 6px; scrollbar-width: none; }
+  .nav-strip::-webkit-scrollbar { display: none; }
+  .nav-num {
+    flex: 0 0 auto; min-width: 38px; height: 38px; border-radius: 50%; border: 2px solid transparent;
+    background: transparent; color: var(--text); font-size: 14px; cursor: pointer; padding: 0 6px;
   }
-  .result-sub {
-    text-align: center; color: var(--hint); margin-bottom: 24px; font-size: 15px;
+  .nav-num.answered { background: var(--card2); }
+  .nav-num.ok { background: var(--ok-bg); color: var(--ok); }
+  .nav-num.bad { background: var(--bad-bg); color: var(--bad); }
+  .nav-num.cur { border-color: var(--button); }
+
+  .q-card { background: var(--card); border-radius: 16px; overflow: hidden; }
+  .q-text { padding: 16px; font-size: 17px; font-weight: 600; line-height: 1.42; }
+  .q-num { display: inline-block; font-size: 12px; color: var(--hint); font-weight: 500; margin-bottom: 6px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left; background: transparent;
+    color: var(--text); border: none; border-top: 1px solid var(--line); padding: 14px 16px; font-size: 15.5px; line-height: 1.35; cursor: pointer;
   }
-  .center { text-align: center; }
-  .spacer { height: 10px; }
+  .option .dot { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--hint); margin-top: 1px; position: relative; }
+  .option.sel { background: rgba(46,166,255,0.12); }
+  .option.sel .dot { border-color: var(--button); }
+  .option.sel .dot::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--button); }
+  .option.correct { background: var(--ok-bg); }
+  .option.correct .dot { border-color: var(--ok); }
+  .option.correct .dot::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--ok); }
+  .option.wrong { background: var(--bad-bg); }
+  .option.wrong .dot { border-color: var(--bad); }
+  .option.wrong .dot::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--bad); }
+  .option.locked { cursor: default; }
+  .q-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding: 8px 10px; }
+  .fav-btn { border: none; background: none; font-size: 22px; cursor: pointer; padding: 6px; color: var(--bad); }
+  .q-foot .st { font-size: 13px; color: var(--hint); padding-right: 6px; }
+
+  .bottom-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+  }
+  .bottom-bar .inner { max-width: 532px; margin: 0 auto; display: flex; gap: 10px; }
+  .bottom-bar .btn { margin-top: 0; }
+  .bottom-bar .btn.sm { flex: 0 0 64px; }
+
+  /* ---------- Natija ---------- */
+  .result-score { font-size: 44px; font-weight: 800; text-align: center; margin: 14px 0 2px; }
+  .result-sub { text-align: center; color: var(--hint); margin-bottom: 16px; font-size: 15px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .stat-grid > div { background: var(--card); border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .stat-grid b { display: block; font-size: 20px; }
+  .stat-grid span { font-size: 12px; color: var(--hint); }
+  .sec-title { font-weight: 700; margin: 18px 0 8px; font-size: 16px; }
+  .review-item { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; font-size: 14.5px; line-height: 1.4; }
+  .review-item .rq { font-weight: 600; margin-bottom: 6px; }
+  .review-item .ra { color: var(--ok); }
+  .review-item .rw { color: var(--bad); }
+  .review-item .ro { padding: 3px 0; }
+
+  .big-bar { height: 10px; border-radius: 5px; background: var(--card2); overflow: hidden; display: flex; margin: 6px 0 14px; }
+  .big-bar .ok { background: var(--ok); }
+  .big-bar .bad { background: var(--bad); }
+  .hist-row { display: flex; justify-content: space-between; background: var(--card); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; font-size: 14px; }
+  .empty { text-align: center; color: var(--hint); padding: 30px 10px; }
 </style>
 </head>
 <body>
 
-<!-- 1. Bank tanlash -->
+<!-- 1. Bosh sahifa: banklar ro'yxati -->
 <div id="screen-home" class="screen active">
-  <div class="title">Test banki tanlang</div>
-  <div class="subtitle">Bankdagi barcha savollar tasodifiy tartibda beriladi</div>
+  <div class="title">Test banklari</div>
+  <div class="summary" id="home-summary"></div>
+  <input class="search" id="bank-search" placeholder="🔍 Bank qidirish..." />
+  <div class="chips-row" id="subject-chips"></div>
   <div id="bank-list"></div>
 </div>
 
 <!-- 2. Test jarayoni -->
 <div id="screen-quiz" class="screen">
-  <button class="btn-back" id="btn-back">⬅️ Menyuga qaytish</button>
-  <div class="progress-wrap">
-    <span id="progress-label">1 / 15</span>
-    <span id="progress-score">0 ✅</span>
+  <div class="q-header">
+    <button class="icon-btn" id="quiz-back">←</button>
+    <div class="mid">
+      <div class="mode" id="quiz-mode"></div>
+      <div class="bt" id="quiz-bank"></div>
+    </div>
+    <div class="right">
+      <div class="timer" id="quiz-timer"></div>
+      <div id="quiz-count"></div>
+    </div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-  <div class="q-text" id="q-text"></div>
-  <div id="options"></div>
-  <button class="btn-next" id="btn-next">Keyingisi →</button>
+  <div class="nav-strip" id="nav-strip"></div>
+  <div class="q-card">
+    <div class="q-text"><span class="q-num" id="q-num"></span><div id="q-text"></div></div>
+    <div id="options"></div>
+    <div class="q-foot">
+      <button class="fav-btn" id="q-fav">♡</button>
+      <span class="st" id="q-stat"></span>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="inner">
+      <button class="btn secondary sm" id="btn-prev">←</button>
+      <button class="btn" id="btn-next">Keyingisi →</button>
+    </div>
+  </div>
 </div>
 
 <!-- 3. Natija -->
 <div id="screen-result" class="screen">
-  <div class="title center">Test tugadi!</div>
-  <div class="result-score" id="result-score">0/15</div>
+  <div class="title" style="text-align:center">Test tugadi!</div>
+  <div class="result-score" id="result-score">0/0</div>
   <div class="result-sub" id="result-sub"></div>
-  <button class="btn" id="btn-retry">🔁 Yana shu bankdan</button>
-  <button class="btn secondary" id="btn-home">⬅️ Banklarga qaytish</button>
+  <div class="stat-grid" id="result-grid"></div>
+  <button class="btn" id="btn-retry-wrong">🔁 Xatolarni qayta ishlash</button>
+  <button class="btn secondary" id="btn-retry">Qaytadan boshlash</button>
+  <button class="btn secondary" id="btn-res-home">⬅️ Banklarga qaytish</button>
+  <div id="result-review"></div>
+</div>
+
+<!-- 4. Ko'rish (barcha savollar + to'g'ri javoblar) -->
+<div id="screen-view" class="screen">
+  <div class="q-header">
+    <button class="icon-btn" id="view-back">←</button>
+    <div class="mid"><div class="mode">Ko'rish</div><div class="bt" id="view-bank"></div></div>
+  </div>
+  <input class="search" id="view-search" placeholder="🔍 Savol yoki javob bo'yicha qidirish..." />
+  <div class="chips-row" id="view-chips"></div>
+  <div id="view-list"></div>
+</div>
+
+<!-- 5. Statistika -->
+<div id="screen-stats" class="screen">
+  <div class="q-header">
+    <button class="icon-btn" id="stats-back">←</button>
+    <div class="mid"><div class="mode">Statistika</div><div class="bt" id="stats-bank"></div></div>
+  </div>
+  <div id="stats-body"></div>
+</div>
+
+<!-- Bank menyusi -->
+<div class="overlay" id="ov-bank">
+  <div class="sheet">
+    <div class="sheet-head"><div class="t" id="bank-sheet-title"></div><button class="x-btn" data-close>✕</button></div>
+    <button class="menu-item" id="m-view"><span class="ic">👁</span><span>Ko'rish<small>Barcha savollar va to'g'ri javoblar</small></span></button>
+    <button class="menu-item" id="m-train"><span class="ic">✓</span><span>Mashq testi<small>Javob darhol tekshiriladi</small></span></button>
+    <button class="menu-item" id="m-exam"><span class="ic">✓✓</span><span>Imtihon<small>Natija oxirida ko'rsatiladi</small></span></button>
+    <button class="menu-item" id="m-stats"><span class="ic">📊</span><span>Statistika</span></button>
+  </div>
+</div>
+
+<!-- Test sozlamalari -->
+<div class="overlay" id="ov-setup">
+  <div class="sheet">
+    <div class="sheet-head"><div class="t" id="setup-title">Testni boshlash</div><button class="x-btn" data-close>✕</button></div>
+
+    <div class="form-label">Savollar</div>
+    <label class="radio-row"><input type="radio" name="qmode" value="all" checked /><div class="radio-body">Hammasi</div></label>
+    <label class="radio-row"><input type="radio" name="qmode" value="random" />
+      <div class="radio-body"><div class="muted" style="font-size:13px;margin-bottom:4px">Tasodifiy savollar</div>
+        <select class="sel" id="s-random"></select></div></label>
+    <label class="radio-row"><input type="radio" name="qmode" value="range" />
+      <div class="radio-body"><div class="muted" style="font-size:13px;margin-bottom:4px">Savollar oralig'i</div>
+        <div class="two"><div><small>Dan</small><input class="inp" id="s-from" type="number" inputmode="numeric" min="1" /></div>
+        <div><small>Gacha</small><input class="inp" id="s-to" type="number" inputmode="numeric" min="1" /></div></div></div></label>
+
+    <div class="form-label">Vaqt limiti</div>
+    <select class="sel" id="s-time">
+      <option value="0">— (cheklovsiz)</option>
+      <option value="5">5 daqiqa</option><option value="10">10 daqiqa</option><option value="15">15 daqiqa</option>
+      <option value="20">20 daqiqa</option><option value="30">30 daqiqa</option><option value="45">45 daqiqa</option>
+      <option value="60">60 daqiqa</option><option value="90">90 daqiqa</option>
+    </select>
+
+    <div class="form-label">Filtr</div>
+    <label class="check-row"><input type="checkbox" id="f-shq" checked />Savollarni aralashtirish</label>
+    <label class="check-row"><input type="checkbox" id="f-sha" checked />Javoblarni aralashtirish</label>
+    <label class="check-row" id="row-un"><input type="checkbox" id="f-un" />Javob berilmagan savollar<span class="cnt" id="c-un"></span></label>
+    <label class="check-row" id="row-wr"><input type="checkbox" id="f-wr" />Xato qilingan savollar<span class="cnt" id="c-wr"></span></label>
+    <label class="check-row" id="row-fav"><input type="checkbox" id="f-fav" />Sevimli savollar<span class="cnt" id="c-fav"></span></label>
+
+    <div class="pool-info" id="pool-info"></div>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn outline" data-close>Bekor qilish</button>
+      <button class="btn" id="s-start">Boshlash</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -159,15 +324,14 @@ if (tg) {
   tg.ready();
   tg.expand();
   try {
-    // Ranglar doimiy (qorong'i, yuqori kontrastli) qilib belgilangan -
-    // Telegram temasidagi matn rangiga ishonmaymiz, chunki ba'zi
-    // mijozlarda u yetarlicha yorqin kelmaydi va matn kechasi
-    // o'qilmay qoladi. Faqat tugma rangini temadan olamiz.
+    // Ranglar doimiy (qorong'i, yuqori kontrastli) - faqat tugma rangini temadan olamiz.
     const tp = tg.themeParams || {};
     const root = document.documentElement.style;
-    const hex = (v, fallback) => (v ? '#' + v : fallback);
+    const hex = (v, fallback) => (v ? (v.startsWith('#') ? v : '#' + v) : fallback);
     root.setProperty('--button', hex(tp.button_color, '#2ea6ff'));
     root.setProperty('--button-text', hex(tp.button_text_color, '#ffffff'));
+    tg.setHeaderColor && tg.setHeaderColor('#12181f');
+    tg.setBackgroundColor && tg.setBackgroundColor('#12181f');
   } catch (e) {}
 }
 
@@ -256,18 +420,10 @@ const BANKS = [
   { key: 'medbio_t23', title: 'Мед.биология — Тема 23: Насекомые имеющие медицинское значение: Вши, клопы…', file: 'medbio_t23.json' },
   { key: 'medbio_t24', title: 'Мед.биология — Тема 24: Ядовитые животные. Изучение оказания первой помощи…', file: 'medbio_t24.json' },
 ];
-const QUIZ_LEN = null; // null = bankdagi barcha savollar
 
-let questionBanks = {};
-let session = [];
-let idx = 0;
-let score = 0;
-let currentBankKey = null;
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+const SUBJECTS = { bio: 'Biologiya', chem: 'Kimyo', medchem: 'Мед.химия', medbio: 'Мед.биология' };
+const subjOf = (key) => key.split('_')[0];
+const $ = (id) => document.getElementById(id);
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -277,122 +433,637 @@ function shuffle(arr) {
   }
   return a;
 }
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function haptic(type) {
+  try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(type); } catch (e) {}
+}
+function askConfirm(msg, cb) {
+  if (tg && tg.showConfirm && tg.isVersionAtLeast && tg.isVersionAtLeast('6.2')) tg.showConfirm(msg, (ok) => ok && cb());
+  else if (confirm(msg)) cb();
+}
+function fmtTime(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+function bankByKey(k) { return BANKS.find(b => b.key === k); }
+// Sarlavhadagi "(46 savol)" qismini olib tashlaymiz - son alohida chipda ko'rsatiladi
+function cleanTitle(t) { return t.replace(/\s*\(\d+ savol\)\s*$/, ''); }
+
+/* ================= Saqlash (localStorage + Telegram CloudStorage) =================
+   Har bir bank uchun: c = oxirgi marta to'g'ri javob berilgan savollar,
+   w = oxirgi marta xato javob berilgan, f = sevimlilar, h = urinishlar tarixi.
+   Savollar bankdagi tartib raqami (0 dan) bilan saqlanadi. */
+const Store = {
+  data: {},
+  k(b) { return 'qb_' + b; },
+  norm(v) {
+    v = v || {};
+    return { c: v.c || [], w: v.w || [], f: v.f || [], h: v.h || [], t: v.t || 0 };
+  },
+  get(b) {
+    if (!this.data[b]) {
+      let v = null;
+      try { v = JSON.parse(localStorage.getItem(this.k(b))); } catch (e) {}
+      this.data[b] = this.norm(v);
+    }
+    return this.data[b];
+  },
+  save(b) {
+    const d = this.get(b);
+    d.t = Date.now();
+    const s = JSON.stringify(d);
+    try { localStorage.setItem(this.k(b), s); } catch (e) {}
+    if (cloudOK()) { try { tg.CloudStorage.setItem(this.k(b), s, () => {}); } catch (e) {} }
+  },
+  answer(b, qi, ok) {
+    const d = this.get(b);
+    d.c = d.c.filter(x => x !== qi);
+    d.w = d.w.filter(x => x !== qi);
+    (ok ? d.c : d.w).push(qi);
+  },
+  isFav(b, qi) { return this.get(b).f.includes(qi); },
+  toggleFav(b, qi) {
+    const d = this.get(b);
+    if (d.f.includes(qi)) d.f = d.f.filter(x => x !== qi); else d.f.push(qi);
+    this.save(b);
+    return d.f.includes(qi);
+  },
+  addHistory(b, rec) {
+    const d = this.get(b);
+    d.h.push(rec);
+    if (d.h.length > 15) d.h = d.h.slice(-15);
+  },
+  reset(b) {
+    this.data[b] = this.norm(null);
+    this.save(b);
+  },
+  syncFromCloud(done) {
+    if (!cloudOK()) return done && done();
+    const keys = BANKS.map(b => this.k(b.key));
+    const chunks = [];
+    for (let i = 0; i < keys.length; i += 20) chunks.push(keys.slice(i, i + 20));
+    let left = chunks.length, changed = false;
+    chunks.forEach(ch => {
+      try {
+        tg.CloudStorage.getItems(ch, (err, vals) => {
+          if (!err && vals) {
+            Object.keys(vals).forEach(key => {
+              if (!vals[key]) return;
+              try {
+                const cv = this.norm(JSON.parse(vals[key]));
+                const bk = key.slice(3);
+                const lv = this.get(bk);
+                if (cv.t > lv.t) {
+                  this.data[bk] = cv;
+                  try { localStorage.setItem(key, vals[key]); } catch (e) {}
+                  changed = true;
+                }
+              } catch (e) {}
+            });
+          }
+          if (--left === 0 && done) done(changed);
+        });
+      } catch (e) { if (--left === 0 && done) done(changed); }
+    });
+  },
+};
+function cloudOK() {
+  return !!(tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast('6.9'));
+}
+
+/* ================= Ekranlar va Telegram "Orqaga" tugmasi ================= */
+let currentScreen = 'screen-home';
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  currentScreen = id;
+  window.scrollTo(0, 0);
+  updateBackButton();
+}
+function openSheet(id) { $(id).classList.add('show'); updateBackButton(); }
+function closeSheet(id) { $(id).classList.remove('show'); updateBackButton(); }
+function openSheetId() { const o = document.querySelector('.overlay.show'); return o ? o.id : null; }
+function updateBackButton() {
+  if (!tg || !tg.BackButton) return;
+  if (openSheetId() || currentScreen !== 'screen-home') tg.BackButton.show(); else tg.BackButton.hide();
+}
+function goBack() {
+  const sh = openSheetId();
+  if (sh) return closeSheet(sh);
+  if (currentScreen === 'screen-quiz') return confirmLeaveQuiz();
+  if (currentScreen === 'screen-view' || currentScreen === 'screen-stats') {
+    showScreen('screen-home'); renderBankList(); return openBankMenu(currentBankKey);
+  }
+  showScreen('screen-home'); renderBankList();
+}
+if (tg && tg.BackButton) tg.BackButton.onClick(goBack);
+document.querySelectorAll('.overlay').forEach(ov => {
+  ov.addEventListener('click', (e) => { if (e.target === ov) closeSheet(ov.id); });
+  ov.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeSheet(ov.id));
+});
+
+/* ================= Bosh sahifa ================= */
+let questionBanks = {};
+let currentBankKey = null;
+let subjectFilter = 'all';
 
 async function loadBanks() {
-  const listEl = document.getElementById('bank-list');
-  listEl.innerHTML = '<div class="subtitle">Yuklanmoqda...</div>';
+  $('bank-list').innerHTML = '<div class="empty">Yuklanmoqda...</div>';
   await Promise.all(BANKS.map(async (b) => {
     try {
       const res = await fetch(b.file);
-      const data = await res.json();
-      questionBanks[b.key] = data;
+      questionBanks[b.key] = await res.json();
     } catch (e) {
       questionBanks[b.key] = [];
     }
   }));
+  renderSubjectChips();
   renderBankList();
+  Store.syncFromCloud((changed) => { if (changed && currentScreen === 'screen-home') renderBankList(); });
+}
+
+function renderSubjectChips() {
+  const row = $('subject-chips');
+  row.innerHTML = '';
+  const items = [['all', 'Hammasi']].concat(Object.entries(SUBJECTS));
+  items.forEach(([k, label]) => {
+    const c = el('button', 'fchip' + (subjectFilter === k ? ' active' : ''), label);
+    c.onclick = () => { subjectFilter = k; renderSubjectChips(); renderBankList(); };
+    row.appendChild(c);
+  });
 }
 
 function renderBankList() {
-  const listEl = document.getElementById('bank-list');
-  listEl.innerHTML = '';
+  const list = $('bank-list');
+  list.innerHTML = '';
+  const q = $('bank-search').value.trim().toLowerCase();
+  let totQ = 0, totC = 0, totW = 0, totF = 0;
   BANKS.forEach(b => {
-    const count = (questionBanks[b.key] || []).length;
-    const card = document.createElement('div');
-    card.className = 'bank-card';
-    card.innerHTML = `<div class="bank-title">${b.title}</div><div class="bank-count">${count} ta savol</div>`;
-    card.onclick = () => startQuiz(b.key);
-    listEl.appendChild(card);
-  });
-}
+    const n = (questionBanks[b.key] || []).length;
+    const d = Store.get(b.key);
+    totQ += n; totC += d.c.length; totW += d.w.length; totF += d.f.length;
+    if (subjectFilter !== 'all' && subjOf(b.key) !== subjectFilter) return;
+    if (q && !b.title.toLowerCase().includes(q)) return;
 
-function startQuiz(bankKey) {
-  currentBankKey = bankKey;
-  const pool = questionBanks[bankKey] || [];
-  const n = QUIZ_LEN === null ? pool.length : Math.min(QUIZ_LEN, pool.length);
-  const chosen = shuffle(pool).slice(0, n);
-  session = chosen.map(item => ({
-    q: item.q,
-    options: shuffle(item.options),
-    correct: item.correct,
-  }));
-  idx = 0;
-  score = 0;
-  showScreen('screen-quiz');
-  renderQuestion();
-}
-
-function renderQuestion() {
-  const item = session[idx];
-  document.getElementById('progress-label').textContent = `${idx + 1} / ${session.length}`;
-  document.getElementById('progress-score').textContent = `${score} ✅`;
-  document.getElementById('progress-fill').style.width = `${(idx / session.length) * 100}%`;
-  document.getElementById('q-text').textContent = item.q;
-
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.classList.remove('show');
-
-  const optsEl = document.getElementById('options');
-  optsEl.innerHTML = '';
-  item.options.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'option';
-    btn.textContent = opt;
-    btn.onclick = () => selectAnswer(opt, btn);
-    optsEl.appendChild(btn);
-  });
-}
-
-function selectAnswer(chosenOpt, btnEl) {
-  const item = session[idx];
-  const allBtns = document.querySelectorAll('#options .option');
-  allBtns.forEach(b => b.classList.add('disabled'));
-
-  const isCorrect = chosenOpt.trim() === item.correct.trim();
-  if (isCorrect) {
-    score++;
-    btnEl.classList.add('correct');
-    if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success');
-  } else {
-    btnEl.classList.add('wrong');
-    allBtns.forEach(b => {
-      if (b.textContent.trim() === item.correct.trim()) b.classList.add('correct');
-    });
-    if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('error');
-  }
-
-  document.getElementById('progress-score').textContent = `${score} ✅`;
-
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.classList.add('show');
-  nextBtn.textContent = (idx + 1 >= session.length) ? "Yakunlash →" : "Keyingisi →";
-  nextBtn.onclick = () => {
-    idx++;
-    if (idx >= session.length) {
-      finishQuiz();
-    } else {
-      renderQuestion();
+    const card = el('div', 'bank-card');
+    card.dataset.subj = subjOf(b.key);
+    card.appendChild(el('div', 'bank-title', cleanTitle(b.title)));
+    const chips = el('div', 'chips');
+    chips.appendChild(el('span', 'chip', `❓ ${n}`));
+    const pct = n ? Math.round(d.c.length / n * 100) : 0;
+    chips.appendChild(el('span', 'chip', `🎓 ${d.c.length} / ${pct}%`));
+    if (d.w.length) chips.appendChild(el('span', 'chip', `✗ ${d.w.length}`));
+    if (d.f.length) chips.appendChild(el('span', 'chip', `♥ ${d.f.length}`));
+    if (d.h.length) chips.appendChild(el('span', 'chip', `🔁 ${d.h.length}`));
+    card.appendChild(chips);
+    if (d.c.length || d.w.length) {
+      const bar = el('div', 'mini-bar');
+      const ok = el('div', 'ok'); ok.style.width = (d.c.length / n * 100) + '%';
+      const bad = el('div', 'bad'); bad.style.width = (d.w.length / n * 100) + '%';
+      bar.append(ok, bad);
+      card.appendChild(bar);
     }
+    card.onclick = () => openBankMenu(b.key);
+    list.appendChild(card);
+  });
+  if (!list.children.length) list.appendChild(el('div', 'empty', 'Hech narsa topilmadi'));
+
+  const sum = $('home-summary');
+  sum.innerHTML = '';
+  [[totQ, 'savol'], [totC, "to'g'ri"], [totW, 'xato'], [totF, 'sevimli']].forEach(([v, l]) => {
+    const d = el('div'); d.appendChild(el('b', '', String(v))); d.appendChild(el('span', '', l)); sum.appendChild(d);
+  });
+}
+$('bank-search').addEventListener('input', renderBankList);
+
+function openBankMenu(key) {
+  currentBankKey = key;
+  $('bank-sheet-title').textContent = cleanTitle(bankByKey(key).title);
+  openSheet('ov-bank');
+}
+$('m-view').onclick = () => { closeSheet('ov-bank'); openView(currentBankKey); };
+$('m-train').onclick = () => { closeSheet('ov-bank'); openSetup('train'); };
+$('m-exam').onclick = () => { closeSheet('ov-bank'); openSetup('exam'); };
+$('m-stats').onclick = () => { closeSheet('ov-bank'); openStats(currentBankKey); };
+
+/* ================= Test sozlamalari ================= */
+let setupMode = 'train';
+function openSetup(mode) {
+  setupMode = mode;
+  const pool = questionBanks[currentBankKey] || [];
+  const n = pool.length;
+  const d = Store.get(currentBankKey);
+  $('setup-title').textContent = mode === 'exam' ? 'Imtihonni boshlash' : 'Mashq testini boshlash';
+
+  const sel = $('s-random');
+  sel.innerHTML = '';
+  [10, 20, 25, 30, 50, 100].filter(x => x < n).concat([n]).forEach(v => {
+    const o = el('option', '', v === n ? `Hammasi (${n})` : String(v)); o.value = v; sel.appendChild(o);
+  });
+  const pref = [...sel.options].find(o => +o.value === Math.min(n, mode === 'exam' ? 25 : 10));
+  if (pref) sel.value = pref.value;
+
+  $('s-from').value = 1; $('s-to').value = n;
+  $('s-from').max = n; $('s-to').max = n;
+  $('s-time').value = mode === 'exam' ? '30' : '0';
+  document.querySelector('input[name=qmode][value=all]').checked = true;
+  ['f-un', 'f-wr', 'f-fav'].forEach(id => $(id).checked = false);
+
+  const answered = new Set(d.c.concat(d.w));
+  $('c-un').textContent = n - answered.size;
+  $('c-wr').textContent = d.w.length;
+  $('c-fav').textContent = d.f.length;
+  $('row-wr').classList.toggle('off', !d.w.length);
+  $('row-fav').classList.toggle('off', !d.f.length);
+  $('row-un').classList.toggle('off', answered.size >= n);
+  syncSetupUI();
+  openSheet('ov-setup');
+}
+
+function readSetup() {
+  const pool = questionBanks[currentBankKey] || [];
+  const n = pool.length;
+  const d = Store.get(currentBankKey);
+  const qmode = document.querySelector('input[name=qmode]:checked').value;
+  let idxs = [...Array(n).keys()];
+
+  if (qmode === 'range') {
+    let a = parseInt($('s-from').value, 10), b = parseInt($('s-to').value, 10);
+    if (!(a >= 1)) a = 1; if (!(b >= 1)) b = n;
+    a = Math.min(a, n); b = Math.min(b, n);
+    if (a > b) [a, b] = [b, a];
+    idxs = idxs.slice(a - 1, b);
+  }
+  // Filtrlar bir-biriga "YOKI" bilan qo'shiladi (masalan: xatolar + sevimlilar)
+  const fUn = $('f-un').checked, fWr = $('f-wr').checked, fFav = $('f-fav').checked;
+  if (fUn || fWr || fFav) {
+    const answered = new Set(d.c.concat(d.w));
+    const wr = new Set(d.w), fav = new Set(d.f);
+    idxs = idxs.filter(i => (fUn && !answered.has(i)) || (fWr && wr.has(i)) || (fFav && fav.has(i)));
+  }
+  if (qmode === 'random') {
+    idxs = shuffle(idxs).slice(0, parseInt($('s-random').value, 10) || idxs.length);
+  }
+  return {
+    idxs,
+    shuffleQ: $('f-shq').checked || qmode === 'random',
+    shuffleA: $('f-sha').checked,
+    timeLimit: (parseInt($('s-time').value, 10) || 0) * 60,
   };
 }
 
-function finishQuiz() {
-  const pct = Math.round((score / session.length) * 100);
-  document.getElementById('result-score').textContent = `${score}/${session.length}`;
-  document.getElementById('result-sub').textContent = `${pct}% to'g'ri javob`;
-  showScreen('screen-result');
+function syncSetupUI() {
+  const qmode = document.querySelector('input[name=qmode]:checked').value;
+  $('s-random').disabled = qmode !== 'random';
+  $('s-from').disabled = $('s-to').disabled = qmode !== 'range';
+  const cnt = readSetup().idxs.length;
+  $('pool-info').textContent = cnt ? `Testda ${cnt} ta savol bo'ladi` : 'Tanlangan shartlarga mos savol yo\'q';
+  $('s-start').disabled = !cnt;
+}
+document.querySelectorAll('#ov-setup input, #ov-setup select').forEach(i => {
+  i.addEventListener('change', syncSetupUI);
+  i.addEventListener('input', syncSetupUI);
+});
+// Tanlov maydoniga bosilganda tegishli rejim avtomatik tanlansin
+$('s-random').addEventListener('focus', () => { document.querySelector('input[name=qmode][value=random]').checked = true; syncSetupUI(); });
+['s-from', 's-to'].forEach(id => $(id).addEventListener('focus', () => { document.querySelector('input[name=qmode][value=range]').checked = true; syncSetupUI(); }));
+
+$('s-start').onclick = () => {
+  const s = readSetup();
+  if (!s.idxs.length) return;
+  closeSheet('ov-setup');
+  startSession(currentBankKey, setupMode, s.shuffleQ ? shuffle(s.idxs) : s.idxs, s);
+};
+
+/* ================= Test jarayoni ================= */
+let S = null; // joriy sessiya
+let lastSetup = null;
+
+function startSession(bankKey, mode, idxs, opts) {
+  const pool = questionBanks[bankKey] || [];
+  lastSetup = { bankKey, mode, idxs: idxs.slice(), opts };
+  stopTimer();
+  S = {
+    bank: bankKey, mode,
+    items: idxs.map(qi => {
+      const it = pool[qi];
+      return { qi, q: it.q, correct: it.correct, options: opts.shuffleA ? shuffle(it.options) : it.options.slice(), chosen: null };
+    }),
+    cur: 0,
+    timeLimit: opts.timeLimit || 0,
+    startedAt: Date.now(),
+    timerId: null,
+    finished: false,
+  };
+  $('quiz-mode').textContent = mode === 'exam' ? 'Imtihon' : 'Mashq testi';
+  $('quiz-bank').textContent = cleanTitle(bankByKey(bankKey).title);
+  showScreen('screen-quiz');
+  buildNavStrip();
+  renderQuestion();
+  startTimer();
 }
 
-document.getElementById('btn-retry').onclick = () => startQuiz(currentBankKey);
-document.getElementById('btn-home').onclick = () => showScreen('screen-home');
-document.getElementById('btn-back').onclick = () => {
-  const msg = "Test to'xtatilsin va bosh menyuga qaytilsinmi? Joriy progress saqlanmaydi.";
-  if (tg && tg.showConfirm) {
-    tg.showConfirm(msg, (ok) => { if (ok) showScreen('screen-home'); });
-  } else if (confirm(msg)) {
-    showScreen('screen-home');
+function isCorrect(item) { return item.chosen !== null && item.chosen.trim() === item.correct.trim(); }
+
+function buildNavStrip() {
+  const strip = $('nav-strip');
+  strip.innerHTML = '';
+  S.items.forEach((_, i) => {
+    const b = el('button', 'nav-num', String(i + 1));
+    b.onclick = () => { S.cur = i; renderQuestion(); };
+    strip.appendChild(b);
+  });
+}
+function updateNavStrip() {
+  const btns = $('nav-strip').children;
+  S.items.forEach((it, i) => {
+    const b = btns[i];
+    let cls = 'nav-num';
+    if (it.chosen !== null) cls += S.mode === 'train' ? (isCorrect(it) ? ' ok' : ' bad') : ' answered';
+    if (i === S.cur) cls += ' cur';
+    b.className = cls;
+  });
+  const cur = btns[S.cur];
+  if (cur) {
+    const strip = $('nav-strip');
+    strip.scrollTo({ left: cur.offsetLeft - strip.clientWidth / 2 + cur.clientWidth / 2, behavior: 'smooth' });
   }
+}
+
+function renderQuestion() {
+  const it = S.items[S.cur];
+  const answered = S.items.filter(x => x.chosen !== null).length;
+  $('quiz-count').textContent = S.mode === 'train'
+    ? `${S.items.filter(isCorrect).length} ✅ · ${answered}/${S.items.length}`
+    : `${answered}/${S.items.length}`;
+  $('q-num').textContent = `Savol #${it.qi + 1}`;
+  $('q-text').textContent = it.q;
+
+  const optsEl = $('options');
+  optsEl.innerHTML = '';
+  const locked = S.mode === 'train' && it.chosen !== null;
+  it.options.forEach(opt => {
+    const b = el('button', 'option');
+    b.appendChild(el('span', 'dot'));
+    b.appendChild(el('span', '', opt));
+    if (S.mode === 'train' && it.chosen !== null) {
+      b.classList.add('locked');
+      if (opt.trim() === it.correct.trim()) b.classList.add('correct');
+      else if (opt === it.chosen) b.classList.add('wrong');
+    } else if (opt === it.chosen) {
+      b.classList.add('sel');
+    }
+    if (!locked) b.onclick = () => choose(opt);
+    optsEl.appendChild(b);
+  });
+
+  const fav = Store.isFav(S.bank, it.qi);
+  $('q-fav').textContent = fav ? '♥' : '♡';
+  const d = Store.get(S.bank);
+  $('q-stat').textContent = d.c.includes(it.qi) ? 'Avval: to\'g\'ri' : d.w.includes(it.qi) ? 'Avval: xato' : '';
+  if (S.mode === 'exam') $('q-stat').textContent = '';
+
+  $('btn-prev').disabled = S.cur === 0;
+  const last = S.cur === S.items.length - 1;
+  $('btn-next').textContent = last ? 'Yakunlash ✓' : 'Keyingisi →';
+  updateNavStrip();
+}
+
+function choose(opt) {
+  const it = S.items[S.cur];
+  if (S.mode === 'train') {
+    if (it.chosen !== null) return;
+    it.chosen = opt;
+    const ok = isCorrect(it);
+    haptic(ok ? 'success' : 'error');
+    // Mashq rejimida statistika darhol yangilanadi
+    Store.answer(S.bank, it.qi, ok);
+    Store.save(S.bank);
+  } else {
+    it.chosen = opt;
+    try { tg && tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); } catch (e) {}
+  }
+  renderQuestion();
+}
+
+$('q-fav').onclick = () => {
+  const it = S.items[S.cur];
+  const on = Store.toggleFav(S.bank, it.qi);
+  $('q-fav').textContent = on ? '♥' : '♡';
+  try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch (e) {}
 };
+$('btn-prev').onclick = () => { if (S.cur > 0) { S.cur--; renderQuestion(); } };
+$('btn-next').onclick = () => {
+  if (S.cur < S.items.length - 1) { S.cur++; renderQuestion(); return; }
+  const left = S.items.filter(x => x.chosen === null).length;
+  if (left) askConfirm(`${left} ta savolga javob berilmagan. Testni yakunlaysizmi?`, finishQuiz);
+  else finishQuiz();
+};
+function confirmLeaveQuiz() {
+  askConfirm("Test to'xtatilsinmi? Mashq rejimida berilgan javoblar statistikada saqlanadi.", () => {
+    stopTimer(); S = null; showScreen('screen-home'); renderBankList();
+  });
+}
+$('quiz-back').onclick = confirmLeaveQuiz;
+
+/* ---------- Taymer ---------- */
+function startTimer() {
+  const t = $('quiz-timer');
+  const tick = () => {
+    if (!S) return;
+    const el_ = (Date.now() - S.startedAt) / 1000;
+    if (S.timeLimit) {
+      const rem = S.timeLimit - el_;
+      t.textContent = '⏱ ' + fmtTime(rem);
+      t.classList.toggle('low', rem <= 60);
+      if (rem <= 0) {
+        stopTimer();
+        if (tg && tg.showAlert) tg.showAlert('Vaqt tugadi!');
+        finishQuiz();
+      }
+    } else {
+      t.textContent = '⏱ ' + fmtTime(el_);
+      t.classList.remove('low');
+    }
+  };
+  tick();
+  S.timerId = setInterval(tick, 1000);
+}
+function stopTimer() { if (S && S.timerId) { clearInterval(S.timerId); S.timerId = null; } }
+
+/* ================= Natija ================= */
+function finishQuiz() {
+  if (!S || S.finished) return;
+  S.finished = true;
+  stopTimer();
+  const total = S.items.length;
+  const correct = S.items.filter(isCorrect).length;
+  const answered = S.items.filter(x => x.chosen !== null).length;
+  const wrong = answered - correct;
+  const dur = Math.round((Date.now() - S.startedAt) / 1000);
+  // Imtihonda statistika faqat oxirida yoziladi
+  if (S.mode === 'exam') S.items.forEach(it => { if (it.chosen !== null) Store.answer(S.bank, it.qi, isCorrect(it)); });
+  Store.addHistory(S.bank, { d: Date.now(), m: S.mode === 'exam' ? 'e' : 't', s: correct, n: total, u: dur });
+  Store.save(S.bank);
+
+  const pct = total ? Math.round(correct / total * 100) : 0;
+  $('result-score').textContent = `${correct}/${total}`;
+  $('result-sub').textContent = `${pct}% to'g'ri · ${S.mode === 'exam' ? 'Imtihon' : 'Mashq'} · ${fmtTime(dur)}`;
+  const grid = $('result-grid');
+  grid.innerHTML = '';
+  [[correct, "To'g'ri"], [wrong, 'Xato'], [total - answered, 'Javobsiz']].forEach(([v, l]) => {
+    const d = el('div'); d.appendChild(el('b', '', String(v))); d.appendChild(el('span', '', l)); grid.appendChild(d);
+  });
+  haptic(pct >= 60 ? 'success' : 'warning');
+
+  const bad = S.items.filter(it => !isCorrect(it));
+  $('btn-retry-wrong').classList.toggle('hidden', !bad.length);
+  $('btn-retry-wrong').onclick = () => startSession(S.bank, 'train', bad.map(x => x.qi), { shuffleQ: false, shuffleA: true, timeLimit: 0 });
+
+  const rev = $('result-review');
+  rev.innerHTML = '';
+  if (bad.length) {
+    rev.appendChild(el('div', 'sec-title', `Xatolar va javobsiz savollar (${bad.length})`));
+    bad.forEach(it => {
+      const box = el('div', 'review-item');
+      box.appendChild(el('div', 'rq', `#${it.qi + 1}. ${it.q}`));
+      if (it.chosen !== null) box.appendChild(el('div', 'ro rw', '✗ ' + it.chosen));
+      else box.appendChild(el('div', 'ro muted', '— javob berilmagan'));
+      box.appendChild(el('div', 'ro ra', '✓ ' + it.correct));
+      rev.appendChild(box);
+    });
+  }
+  showScreen('screen-result');
+}
+$('btn-retry').onclick = () => {
+  if (!lastSetup) return;
+  const { bankKey, mode, idxs, opts } = lastSetup;
+  startSession(bankKey, mode, opts.shuffleQ ? shuffle(idxs) : idxs, opts);
+};
+$('btn-res-home').onclick = () => { S = null; showScreen('screen-home'); renderBankList(); };
+
+/* ================= Ko'rish ================= */
+let viewFilter = 'all';
+function openView(key) {
+  currentBankKey = key;
+  viewFilter = 'all';
+  $('view-bank').textContent = cleanTitle(bankByKey(key).title);
+  $('view-search').value = '';
+  showScreen('screen-view');
+  renderViewChips();
+  renderView();
+}
+function renderViewChips() {
+  const row = $('view-chips');
+  row.innerHTML = '';
+  [['all', 'Hammasi'], ['fav', '♥ Sevimlilar'], ['wrong', '✗ Xatolar'], ['new', 'Ishlanmagan']].forEach(([k, l]) => {
+    const c = el('button', 'fchip' + (viewFilter === k ? ' active' : ''), l);
+    c.onclick = () => { viewFilter = k; renderViewChips(); renderView(); };
+    row.appendChild(c);
+  });
+}
+function renderView() {
+  const pool = questionBanks[currentBankKey] || [];
+  const d = Store.get(currentBankKey);
+  const q = $('view-search').value.trim().toLowerCase();
+  const answered = new Set(d.c.concat(d.w));
+  const list = $('view-list');
+  list.innerHTML = '';
+  pool.forEach((it, qi) => {
+    if (viewFilter === 'fav' && !d.f.includes(qi)) return;
+    if (viewFilter === 'wrong' && !d.w.includes(qi)) return;
+    if (viewFilter === 'new' && answered.has(qi)) return;
+    if (q && !(it.q.toLowerCase().includes(q) || it.options.some(o => o.toLowerCase().includes(q)))) return;
+    const card = el('div', 'q-card');
+    card.style.marginBottom = '10px';
+    const head = el('div', 'q-text');
+    head.style.fontSize = '15.5px';
+    head.appendChild(el('span', 'q-num', `Savol #${qi + 1}` + (d.c.includes(qi) ? ' · ✓' : d.w.includes(qi) ? ' · ✗' : '')));
+    head.appendChild(el('div', '', it.q));
+    card.appendChild(head);
+    it.options.forEach(o => {
+      const r = el('div', 'option locked' + (o.trim() === it.correct.trim() ? ' correct' : ''));
+      r.style.padding = '10px 16px'; r.style.fontSize = '14.5px';
+      r.appendChild(el('span', 'dot'));
+      r.appendChild(el('span', '', o));
+      card.appendChild(r);
+    });
+    const foot = el('div', 'q-foot');
+    const fb = el('button', 'fav-btn', Store.isFav(currentBankKey, qi) ? '♥' : '♡');
+    fb.onclick = () => { fb.textContent = Store.toggleFav(currentBankKey, qi) ? '♥' : '♡'; };
+    foot.appendChild(fb);
+    card.appendChild(foot);
+    list.appendChild(card);
+  });
+  if (!list.children.length) list.appendChild(el('div', 'empty', 'Savol topilmadi'));
+}
+$('view-search').addEventListener('input', renderView);
+$('view-back').onclick = goBack;
+
+/* ================= Statistika ================= */
+function openStats(key) {
+  currentBankKey = key;
+  $('stats-bank').textContent = cleanTitle(bankByKey(key).title);
+  renderStats();
+  showScreen('screen-stats');
+}
+function renderStats() {
+  const key = currentBankKey;
+  const n = (questionBanks[key] || []).length;
+  const d = Store.get(key);
+  const body = $('stats-body');
+  body.innerHTML = '';
+  const answered = d.c.length + d.w.length;
+  const acc = answered ? Math.round(d.c.length / answered * 100) : 0;
+
+  const grid = el('div', 'stat-grid');
+  [[n, 'Jami savol'], [answered, 'Ishlangan'], [n - answered, 'Ishlanmagan'],
+   [d.c.length, "To'g'ri"], [d.w.length, 'Xato'], [d.f.length, 'Sevimli']].forEach(([v, l]) => {
+    const x = el('div'); x.appendChild(el('b', '', String(v))); x.appendChild(el('span', '', l)); grid.appendChild(x);
+  });
+  body.appendChild(grid);
+
+  body.appendChild(el('div', 'muted', `O'zlashtirish: ${n ? Math.round(d.c.length / n * 100) : 0}% · Aniqlik: ${acc}%`));
+  const bar = el('div', 'big-bar');
+  const ok = el('div', 'ok'); ok.style.width = (n ? d.c.length / n * 100 : 0) + '%';
+  const bad = el('div', 'bad'); bad.style.width = (n ? d.w.length / n * 100 : 0) + '%';
+  bar.append(ok, bad);
+  body.appendChild(bar);
+
+  if (d.w.length) {
+    const b = el('button', 'btn', `✗ Xatolarni ishlash (${d.w.length})`);
+    b.onclick = () => startSession(key, 'train', shuffle(d.w), { shuffleQ: true, shuffleA: true, timeLimit: 0 });
+    body.appendChild(b);
+  }
+  if (d.f.length) {
+    const b = el('button', 'btn secondary', `♥ Sevimlilarni ishlash (${d.f.length})`);
+    b.onclick = () => startSession(key, 'train', shuffle(d.f), { shuffleQ: true, shuffleA: true, timeLimit: 0 });
+    body.appendChild(b);
+  }
+
+  body.appendChild(el('div', 'sec-title', 'Urinishlar tarixi'));
+  if (!d.h.length) body.appendChild(el('div', 'empty', "Hali urinishlar yo'q"));
+  d.h.slice().reverse().forEach(h => {
+    const r = el('div', 'hist-row');
+    const dt = new Date(h.d);
+    const when = `${String(dt.getDate()).padStart(2, '0')}.${String(dt.getMonth() + 1).padStart(2, '0')} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+    r.appendChild(el('span', '', `${h.m === 'e' ? '✓✓ Imtihon' : '✓ Mashq'} · ${when}`));
+    r.appendChild(el('b', '', `${h.s}/${h.n} (${h.n ? Math.round(h.s / h.n * 100) : 0}%)`));
+    body.appendChild(r);
+  });
+
+  const reset = el('button', 'btn outline', 'Statistikani tozalash');
+  reset.style.marginTop = '20px';
+  reset.onclick = () => askConfirm("Bu bank bo'yicha barcha statistika va sevimlilar o'chirilsinmi?", () => { Store.reset(key); renderStats(); });
+  body.appendChild(reset);
+}
+$('stats-back').onclick = goBack;
 
 loadBanks();
 </script>
