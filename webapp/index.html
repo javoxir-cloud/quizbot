@@ -670,13 +670,13 @@ function showLocked(reason) {
   $('bank-search').classList.add('hidden');
   box.innerHTML = '';
   const msg = reason === 'auth'
-    ? "Ilovani Telegram bot ichidan oching."
+    ? "Ilovani qayta oching:\n\nbotga /start yuboring va xabar ostidagi «🎮 Testni boshlash» tugmasini yoki chap pastdagi «Test» menyu tugmasini bosing."
     : "⛔ Sizga hali ruxsat berilmagan.\n\nBotga /start yuboring — so'rovingiz adminga boradi. Ruxsat berilgach, ilovani qayta oching.";
   const e = el('div', 'empty', msg);
   e.style.whiteSpace = 'pre-line';
   e.style.fontSize = '16px';
   box.appendChild(e);
-  if (reason !== 'auth' && tg && tg.close) {
+  if (tg && tg.close && INIT_DATA !== undefined) {
     const b = el('button', 'btn', 'Botga qaytish');
     b.onclick = () => tg.close();
     box.appendChild(b);

@@ -15,12 +15,11 @@ from urllib.parse import parse_qsl
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.types import (
+    MenuButtonWebApp,
     CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    KeyboardButton,
     Message,
-    ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
     WebAppInfo,
 )
@@ -183,12 +182,22 @@ def fmt_exp(exp) -> str:
 
 
 # ================================================================ bot
-def main_menu() -> ReplyKeyboardMarkup:
+def main_menu() -> InlineKeyboardMarkup:
+    """Xabar ostidagi (inline) tugma. MUHIM: pastki reply-klaviatura tugmasi
+    orqali ochilgan Mini App'ga Telegram initData bermaydi - shuning uchun
+    faqat inline tugma va menyu tugmasidan foydalanamiz."""
     url = get_webapp_url()
-    buttons = []
-    if url:
-        buttons = [[KeyboardButton(text="🎮 Testni boshlash", web_app=WebAppInfo(url=f"{url}?v={int(time.time())}"))]]
-    return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
+    if not url:
+        return InlineKeyboardMarkup(inline_keyboard=[])
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="🎮 Testni boshlash", web_app=WebAppInfo(url=f"{url}?v={int(time.time())}"))
+    ]])
+
+
+async def send_menu(chat_id: int, greeting: str):
+    # 1) eski pastki klaviaturani olib tashlaymiz, 2) inline tugma yuboramiz
+    await bot.send_message(chat_id, greeting, reply_markup=ReplyKeyboardRemove())
+    await bot.send_message(chat_id, "Testni boshlash uchun tugmani bosing 👇", reply_markup=main_menu())
 
 
 def decision_kb(uid: int) -> InlineKeyboardMarkup:
@@ -212,7 +221,7 @@ async def start(message: Message):
     u = message.from_user
     if await has_access(u.id):
         if get_webapp_url():
-            await message.answer("Salom! Testni boshlash uchun pastdagi tugmani bosing.", reply_markup=main_menu())
+            await send_menu(message.chat.id, "Salom! 👋")
         else:
             await message.answer("Mini-ilova manzili (WEBAPP_URL) sozlanmagan.")
         return
@@ -247,7 +256,7 @@ async def on_decision(cb: CallbackQuery):
         exp = datetime.now(timezone.utc) + timedelta(days=days) if days else None
         await store.upsert(uid, status="allowed", expires_at=exp)
         try:
-            await bot.send_message(uid, f"✅ Sizga ruxsat berildi ({fmt_exp(exp)}). Testni boshlash uchun pastdagi tugmani bosing.",
+            await bot.send_message(uid, f"✅ Sizga ruxsat berildi ({fmt_exp(exp)}). Testni boshlash uchun tugmani bosing 👇",
                                    reply_markup=main_menu())
         except Exception:
             pass
@@ -319,7 +328,7 @@ async def cmd_add(message: Message, command: CommandObject):
     await store.upsert(uid, status="allowed", expires_at=exp)
     await message.answer(f"✅ <code>{uid}</code> ga ruxsat berildi ({fmt_exp(exp)})", parse_mode="HTML")
     try:
-        await bot.send_message(uid, "✅ Sizga ruxsat berildi. Testni boshlash uchun pastdagi tugmani bosing.",
+        await bot.send_message(uid, "✅ Sizga ruxsat berildi. Testni boshlash uchun tugmani bosing 👇",
                                reply_markup=main_menu())
     except Exception:
         await message.answer("ℹ️ Foydalanuvchi hali botga /start bosmagan, unga xabar yuborilmadi. "
@@ -350,7 +359,7 @@ async def send_long(message: Message, text: str):
 @dp.message()
 async def fallback(message: Message):
     if await has_access(message.from_user.id):
-        await message.answer("Testni boshlash uchun pastdagi tugmani bosing.", reply_markup=main_menu())
+        await send_menu(message.chat.id, "Testlar shu yerda 📚")
     else:
         await start(message)
 
@@ -446,6 +455,13 @@ async def main():
     await store.init()
     await start_webapp_server()
     if bot:
+        url = get_webapp_url()
+        if url:
+            try:
+                # Chap pastdagi menyu tugmasi - u ham initData beradi
+                await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Test", web_app=WebAppInfo(url=url)))
+            except Exception as e:
+                logging.warning("Menyu tugmasini o'rnatib bo'lmadi: %s", e)
         await bot.delete_webhook(drop_pending_updates=True)
         await dp.start_polling(bot)
     else:
