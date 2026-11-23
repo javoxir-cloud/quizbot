@@ -1,1 +1,17 @@
-{"title": "Test banklari", "banks": []}
+{
+ "title": "Test banklari",
+ "banks": [
+  {
+   "key": "patfiz_m1t1",
+   "title": "Патофизиология — 1-модуль, Тема 1",
+   "subject": "Патофизиология",
+   "course": "Патофизиология"
+  },
+  {
+   "key": "patfiz_m1t2",
+   "title": "Патофизиология — 1-модуль, Тема 2",
+   "subject": "Патофизиология",
+   "course": "Патофизиология"
+  }
+ ]
+}

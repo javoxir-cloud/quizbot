@@ -229,6 +229,7 @@
   .que .info .flag.on { color: #ca3120; }
   .que .formulation { background: #e7f3f5; border: 1px solid #b8dce2; border-radius: 4px; padding: 14px 14px 10px; color: #001a1e; }
   .que .qtext { font-size: 16px; line-height: 1.45; margin-bottom: 16px; }
+  .qimg { display: block; max-width: 100%; height: auto; margin: 0 0 14px; border-radius: 4px; background: #fff; }
   .que .prompt { font-size: 14.5px; margin-bottom: 8px; }
   .que .ans-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 4px; border-radius: 4px; cursor: pointer; line-height: 1.4; }
   .que .ans-row input { width: 17px; height: 17px; margin: 2px 0 0; flex: 0 0 auto; accent-color: #0f6cbf; }
@@ -813,7 +814,7 @@ function startSession(bankKey, mode, idxs, opts) {
     bank: bankKey, mode,
     items: idxs.map(qi => {
       const it = pool[qi];
-      return { qi, q: it.q, correct: it.correct, options: opts.shuffleA ? shuffle(it.options) : it.options.slice(), chosen: null };
+      return { qi, q: it.q, img: it.img || null, correct: it.correct, options: opts.shuffleA ? shuffle(it.options) : it.options.slice(), chosen: null };
     }),
     cur: 0,
     timeLimit: opts.timeLimit || 0,
@@ -876,6 +877,7 @@ function renderQue(it, num, opts) {
 
   const form = el('div', 'formulation');
   form.appendChild(el('div', 'qtext', it.q));
+  if (it.img) { const im = document.createElement('img'); im.className = 'qimg'; im.src = it.img; im.alt = ''; form.appendChild(im); }
   form.appendChild(el('div', 'prompt', 'Выберите один ответ:'));
   const name = 'q' + num + '_' + Math.random().toString(36).slice(2, 7);
   it.options.forEach((opt, k) => {
@@ -1096,6 +1098,7 @@ function renderView() {
     head.style.fontSize = '15.5px';
     head.appendChild(el('span', 'q-num', `Savol #${qi + 1}` + (d.c.includes(qi) ? ' · ✓' : d.w.includes(qi) ? ' · ✗' : '')));
     head.appendChild(el('div', '', it.q));
+    if (it.img) { const im = document.createElement('img'); im.className = 'qimg'; im.src = it.img; im.alt = ''; head.appendChild(im); }
     card.appendChild(head);
     it.options.forEach(o => {
       const r = el('div', 'option locked' + (o.trim() === it.correct.trim() ? ' correct' : ''));
