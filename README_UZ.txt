@@ -103,3 +103,13 @@ Ishlashi:
   - Admin buyruqlari: /admin, /users, /pending, /add ID [kun], /remove ID, /myid
   - Savollar (data/*.json) endi ochiq emas: Mini App ularni /api/bank/... orqali,
     Telegram imzosi (initData) tekshirilgandan va ruxsat bor bo'lsagina oladi.
+
+
+=== IKKINCHI BOT (@PedFakDKbot) ===
+Ikkala bot bitta Render serverida ishlaydi.
+  BOT2_TOKEN=...      ikkinchi bot tokeni (Render -> Environment)
+Ikkinchi botning savollari: data_ped/ papkasi
+  data_ped/banks.json  - banklar ro'yxati: {"title": ..., "banks": [{"key","title","subject","course"}]}
+  data_ped/<key>.json  - savollar: [{"q": ..., "options": [...], "correct": ...}]
+Ruxsatlar har bir bot uchun alohida (admin buyruqlari o'sha botning o'zida yoziladi).
+Admin har ikkala botga /start bosgan bo'lishi kerak - so'rovlar o'sha botdan keladi.

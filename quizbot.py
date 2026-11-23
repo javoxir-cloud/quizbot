@@ -1,3 +1,16 @@
+"""Test boti (Telegram Mini App).
+
+Bitta server bir nechta botni boshqaradi. Har bir botning o'z savol banklari
+(papkasi) va o'z ruxsatlar ro'yxati bor; Mini App (webapp/index.html) hammasi
+uchun bitta.
+
+Render -> Environment:
+  BOT_TOKEN      1-bot tokeni           (savollar: data/)
+  BOT2_TOKEN     2-bot tokeni, ixtiyoriy (savollar: data_ped/ yoki BOT2_DATA)
+  WEBAPP_URL     https://....onrender.com
+  ADMIN_IDS      admin Telegram ID lari, vergul bilan (bo'sh = ochiq rejim)
+  DATABASE_URL   PostgreSQL (ruxsatlar saqlanadi)
+"""
 import asyncio
 import hashlib
 import hmac
@@ -7,18 +20,19 @@ import logging
 import os
 import re
 import time
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 from urllib.parse import parse_qsl
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.types import (
-    MenuButtonWebApp,
     CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    MenuButtonWebApp,
     Message,
     ReplyKeyboardRemove,
     WebAppInfo,
@@ -32,22 +46,51 @@ logging.basicConfig(level=logging.INFO)
 
 BASE_DIR = Path(__file__).resolve().parent
 WEBAPP_DIR = BASE_DIR / "webapp"
-# Savol banklari endi ochiq papkada emas - faqat /api/bank orqali,
-# ruxsat tekshirilgandan keyin beriladi.
-DATA_DIR = BASE_DIR / "data"
 ENV_PATH = BASE_DIR / ".env"
 WEBAPP_PORT = int(os.getenv("PORT") or os.getenv("WEBAPP_PORT", "8080"))
-BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 # Adminlar: Telegram ID lari vergul bilan, masalan: ADMIN_IDS=123456789,987654321
 ADMIN_IDS = {int(x) for x in re.findall(r"\d+", os.getenv("ADMIN_IDS", ""))}
-# ADMIN_IDS berilmagan bo'lsa - ochiq rejim: hamma foydalana oladi (avvalgidek).
-# ADMIN_IDS qo'yilishi bilan ruxsat tizimi o'zi yoqiladi.
+# ADMIN_IDS berilmagan bo'lsa - ochiq rejim: hamma foydalana oladi.
 OPEN_MODE = not ADMIN_IDS
 # Mini App ochilgandan keyin initData qancha vaqt amal qiladi (soniya)
 INIT_DATA_MAX_AGE = 7 * 24 * 3600
 
-bot = Bot(token=BOT_TOKEN) if BOT_TOKEN else None
+
+@dataclass
+class BotCfg:
+    key: str          # ichki nom: "main", "ped"
+    token: str
+    data_dir: Path    # savol banklari papkasi (banks.json + <key>.json fayllar)
+    bot: Optional[Bot] = None
+    secret: bytes = b""
+
+
+def _bot_cfgs():
+    cfgs = []
+    specs = [
+        ("main", os.getenv("BOT_TOKEN", ""), os.getenv("BOT_DATA", "data")),
+        ("ped", os.getenv("BOT2_TOKEN", ""), os.getenv("BOT2_DATA", "data_ped")),
+    ]
+    for key, token, data in specs:
+        token = token.strip()
+        if not token:
+            continue
+        c = BotCfg(key=key, token=token, data_dir=BASE_DIR / data)
+        c.secret = hmac.new(b"WebAppData", token.encode(), hashlib.sha256).digest()
+        cfgs.append(c)
+    return cfgs
+
+
+BOTS = _bot_cfgs()
+BY_KEY: Dict[str, BotCfg] = {c.key: c for c in BOTS}
+BY_ID: Dict[int, BotCfg] = {}       # bot.id -> cfg (ishga tushganda to'ldiriladi)
+for _c in BOTS:
+    try:
+        _c.bot = Bot(token=_c.token)
+        BY_ID[_c.bot.id] = _c
+    except Exception as e:
+        logging.error("%s boti tokeni noto'g'ri: %s", _c.key, e)
 dp = Dispatcher()
 
 
@@ -56,46 +99,57 @@ def get_webapp_url() -> str:
     return (values.get("WEBAPP_URL") or os.getenv("WEBAPP_URL") or "").strip()
 
 
-_total_savol = 0
-for _p in sorted(DATA_DIR.glob("*.json")):
-    with open(_p, encoding="utf-8") as f:
-        _total_savol += len(json.load(f))
-logging.info("Jami bank fayllari: %d ta, savollar: %d", len(list(DATA_DIR.glob('*.json'))), _total_savol)
+def load_manifest(cfg: BotCfg) -> dict:
+    p = cfg.data_dir / "banks.json"
+    if not p.is_file():
+        return {"title": "Test banklari", "banks": []}
+    with open(p, encoding="utf-8") as f:
+        m = json.load(f)
+    # faqat fayli mavjud banklar
+    m["banks"] = [b for b in m.get("banks", []) if (cfg.data_dir / f"{b['key']}.json").is_file()]
+    return m
+
+
+for _c in BOTS:
+    _m = load_manifest(_c)
+    logging.info("[%s] %d ta bank (%s)", _c.key, len(_m["banks"]), _c.data_dir.name)
+
+
+def cfg_of(bot: Bot) -> BotCfg:
+    return BY_ID[bot.id]
 
 
 # ================================================================ saqlash
-# Har bir foydalanuvchi: status = pending | allowed | denied,
-# expires_at = ruxsat qachongacha (None = muddatsiz). Keyinchalik pullik
-# obuna ham shu ustun orqali ishlaydi.
+# Har bir (bot, foydalanuvchi): status = pending | allowed | denied,
+# expires_at = ruxsat qachongacha (None = muddatsiz). Pullik obuna ham shu orqali.
 class Storage:
     async def init(self): ...
-    async def get(self, uid: int) -> Optional[dict]: ...
-    async def upsert(self, uid: int, **fields): ...
-    async def list(self, status: Optional[str] = None) -> list: ...
+    async def get(self, bk: str, uid: int) -> Optional[dict]: ...
+    async def upsert(self, bk: str, uid: int, **fields): ...
+    async def list(self, bk: str, status: Optional[str] = None) -> list: ...
 
 
 class MemoryStorage(Storage):
-    """Baza ulanmagan bo'lsa (mahalliy sinov uchun). Server qayta ishga
-    tushganda ro'yxat o'chib ketadi!"""
+    """Baza ulanmagan bo'lsa. Server qayta ishga tushganda ro'yxat o'chadi!"""
 
     def __init__(self):
-        self.rows: Dict[int, dict] = {}
+        self.rows: Dict[Tuple[str, int], dict] = {}
 
     async def init(self):
         logging.warning("DATABASE_URL yo'q - ruxsatlar xotirada saqlanadi va qayta ishga tushganda o'chadi!")
 
-    async def get(self, uid):
-        return self.rows.get(uid)
+    async def get(self, bk, uid):
+        return self.rows.get((bk, uid))
 
-    async def upsert(self, uid, **fields):
-        row = self.rows.setdefault(uid, {"user_id": uid, "name": "", "username": "", "status": "pending",
-                                         "expires_at": None, "updated_at": None})
+    async def upsert(self, bk, uid, **fields):
+        row = self.rows.setdefault((bk, uid), {"bot": bk, "user_id": uid, "name": "", "username": "",
+                                               "status": "pending", "expires_at": None, "updated_at": None})
         row.update(fields)
         row["updated_at"] = datetime.now(timezone.utc)
 
-    async def list(self, status=None):
-        rows = [r for r in self.rows.values() if status is None or r["status"] == status]
-        return sorted(rows, key=lambda r: r["updated_at"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    async def list(self, bk, status=None):
+        rows = [r for r in self.rows.values() if r["bot"] == bk and (status is None or r["status"] == status)]
+        return sorted(rows, key=lambda r: r["updated_at"], reverse=True)
 
 
 class PgStorage(Storage):
@@ -109,40 +163,44 @@ class PgStorage(Storage):
         async with self.pool.acquire() as c:
             await c.execute(
                 """
-                CREATE TABLE IF NOT EXISTS access (
-                    user_id    BIGINT PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS bot_access (
+                    bot        TEXT   NOT NULL,
+                    user_id    BIGINT NOT NULL,
                     name       TEXT NOT NULL DEFAULT '',
                     username   TEXT NOT NULL DEFAULT '',
                     status     TEXT NOT NULL DEFAULT 'pending',
                     expires_at TIMESTAMPTZ,
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                    PRIMARY KEY (bot, user_id)
                 )
                 """
             )
         logging.info("PostgreSQL bazaga ulandi")
 
-    async def get(self, uid):
+    async def get(self, bk, uid):
         async with self.pool.acquire() as c:
-            r = await c.fetchrow("SELECT * FROM access WHERE user_id=$1", uid)
+            r = await c.fetchrow("SELECT * FROM bot_access WHERE bot=$1 AND user_id=$2", bk, uid)
         return dict(r) if r else None
 
-    async def upsert(self, uid, **fields):
-        cols = ["user_id"] + list(fields)
-        vals = [uid] + list(fields.values())
+    async def upsert(self, bk, uid, **fields):
+        cols = ["bot", "user_id"] + list(fields)
+        vals = [bk, uid] + list(fields.values())
         ph = ", ".join(f"${i + 1}" for i in range(len(cols)))
-        upd = ", ".join(f"{k}=EXCLUDED.{k}" for k in fields) + (", " if fields else "") + "updated_at=now()"
+        upd = "".join(f"{k}=EXCLUDED.{k}, " for k in fields) + "updated_at=now()"
         async with self.pool.acquire() as c:
             await c.execute(
-                f"INSERT INTO access ({', '.join(cols)}) VALUES ({ph}) ON CONFLICT (user_id) DO UPDATE SET {upd}",
+                f"INSERT INTO bot_access ({', '.join(cols)}) VALUES ({ph}) "
+                f"ON CONFLICT (bot, user_id) DO UPDATE SET {upd}",
                 *vals,
             )
 
-    async def list(self, status=None):
+    async def list(self, bk, status=None):
         async with self.pool.acquire() as c:
             if status:
-                rows = await c.fetch("SELECT * FROM access WHERE status=$1 ORDER BY updated_at DESC", status)
+                rows = await c.fetch("SELECT * FROM bot_access WHERE bot=$1 AND status=$2 ORDER BY updated_at DESC",
+                                     bk, status)
             else:
-                rows = await c.fetch("SELECT * FROM access ORDER BY updated_at DESC")
+                rows = await c.fetch("SELECT * FROM bot_access WHERE bot=$1 ORDER BY updated_at DESC", bk)
         return [dict(r) for r in rows]
 
 
@@ -160,10 +218,10 @@ def row_active(row: Optional[dict]) -> bool:
     return exp is None or exp > datetime.now(timezone.utc)
 
 
-async def has_access(uid: int) -> bool:
-    if OPEN_MODE:
+async def has_access(bk: str, uid: int) -> bool:
+    if OPEN_MODE or is_admin(uid):
         return True
-    return is_admin(uid) or row_active(await store.get(uid))
+    return row_active(await store.get(bk, uid))
 
 
 def user_label(row_or_user) -> str:
@@ -184,8 +242,7 @@ def fmt_exp(exp) -> str:
 # ================================================================ bot
 def main_menu() -> InlineKeyboardMarkup:
     """Xabar ostidagi (inline) tugma. MUHIM: pastki reply-klaviatura tugmasi
-    orqali ochilgan Mini App'ga Telegram initData bermaydi - shuning uchun
-    faqat inline tugma va menyu tugmasidan foydalanamiz."""
+    orqali ochilgan Mini App'ga Telegram initData bermaydi."""
     url = get_webapp_url()
     if not url:
         return InlineKeyboardMarkup(inline_keyboard=[])
@@ -194,8 +251,7 @@ def main_menu() -> InlineKeyboardMarkup:
     ]])
 
 
-async def send_menu(chat_id: int, greeting: str):
-    # 1) eski pastki klaviaturani olib tashlaymiz, 2) inline tugma yuboramiz
+async def send_menu(bot: Bot, chat_id: int, greeting: str):
     await bot.send_message(chat_id, greeting, reply_markup=ReplyKeyboardRemove())
     await bot.send_message(chat_id, "Testni boshlash uchun tugmani bosing 👇", reply_markup=main_menu())
 
@@ -208,7 +264,8 @@ def decision_kb(uid: int) -> InlineKeyboardMarkup:
     ])
 
 
-async def notify_admins(text: str, kb=None):
+async def notify_admins(bot: Bot, text: str, kb=None):
+    # Xabar o'sha botning o'zidan boradi - admin har bir botga /start bosgan bo'lishi kerak
     for aid in ADMIN_IDS:
         try:
             await bot.send_message(aid, text, reply_markup=kb, parse_mode="HTML")
@@ -217,16 +274,17 @@ async def notify_admins(text: str, kb=None):
 
 
 @dp.message(CommandStart())
-async def start(message: Message):
+async def start(message: Message, bot: Bot):
+    bk = cfg_of(bot).key
     u = message.from_user
-    if await has_access(u.id):
+    if await has_access(bk, u.id):
         if get_webapp_url():
-            await send_menu(message.chat.id, "Salom! 👋")
+            await send_menu(bot, message.chat.id, "Salom! 👋")
         else:
             await message.answer("Mini-ilova manzili (WEBAPP_URL) sozlanmagan.")
         return
 
-    row = await store.get(u.id)
+    row = await store.get(bk, u.id)
     if row and row["status"] == "pending":
         await message.answer("⏳ So'rovingiz adminga yuborilgan, javobni kuting.", reply_markup=ReplyKeyboardRemove())
         return
@@ -235,26 +293,26 @@ async def start(message: Message):
                              reply_markup=ReplyKeyboardRemove())
         return
 
-    # Yangi foydalanuvchi yoki muddati tugagan
     expired = row is not None and row["status"] == "allowed"
-    await store.upsert(u.id, name=u.full_name or "", username=u.username or "", status="pending")
+    await store.upsert(bk, u.id, name=u.full_name or "", username=u.username or "", status="pending")
     await message.answer(
         ("⌛ Ruxsat muddatingiz tugagan." if expired else "👋 Salom! Bu bot faqat ruxsat berilgan foydalanuvchilar uchun.")
         + "\n\nSo'rovingiz adminga yuborildi. Ruxsat berilishi bilan sizga xabar keladi.",
         reply_markup=ReplyKeyboardRemove(),
     )
-    await notify_admins(f"🆕 Ruxsat so'rovi:\n{user_label(u)}", decision_kb(u.id))
+    await notify_admins(bot, f"🆕 Ruxsat so'rovi:\n{user_label(u)}", decision_kb(u.id))
 
 
 @dp.callback_query(F.data.startswith("acc:"))
-async def on_decision(cb: CallbackQuery):
+async def on_decision(cb: CallbackQuery, bot: Bot):
     if not is_admin(cb.from_user.id):
         return await cb.answer("Faqat admin uchun", show_alert=True)
+    bk = cfg_of(bot).key
     _, action, uid_s, days_s = cb.data.split(":")
     uid, days = int(uid_s), int(days_s)
     if action == "ok":
         exp = datetime.now(timezone.utc) + timedelta(days=days) if days else None
-        await store.upsert(uid, status="allowed", expires_at=exp)
+        await store.upsert(bk, uid, status="allowed", expires_at=exp)
         try:
             await bot.send_message(uid, f"✅ Sizga ruxsat berildi ({fmt_exp(exp)}). Testni boshlash uchun tugmani bosing 👇",
                                    reply_markup=main_menu())
@@ -262,18 +320,18 @@ async def on_decision(cb: CallbackQuery):
             pass
         note = f"✅ Ruxsat berildi ({fmt_exp(exp)})"
     else:
-        await store.upsert(uid, status="denied", expires_at=None)
+        await store.upsert(bk, uid, status="denied", expires_at=None)
         note = "❌ Rad etildi"
-    row = await store.get(uid)
+    row = await store.get(bk, uid)
     try:
-        await cb.message.edit_text(f"{user_label(row)}\n{note} — {cb.from_user.full_name}", parse_mode="HTML")
+        await cb.message.edit_text(f"{user_label(row)}\n{note} — {html.escape(cb.from_user.full_name)}", parse_mode="HTML")
     except Exception:
         pass
     await cb.answer(note)
 
 
 ADMIN_HELP = (
-    "<b>Admin buyruqlari</b>\n"
+    "<b>Admin buyruqlari</b> (shu bot uchun)\n"
     "/users — ruxsat berilganlar\n"
     "/pending — kutayotgan so'rovlar\n"
     "/add ID [kun] — ruxsat berish (kun yozilmasa muddatsiz)\n"
@@ -294,10 +352,10 @@ async def admin_help(message: Message):
 
 
 @dp.message(Command("users"))
-async def cmd_users(message: Message):
+async def cmd_users(message: Message, bot: Bot):
     if not is_admin(message.from_user.id):
         return
-    rows = [r for r in await store.list("allowed")]
+    rows = await store.list(cfg_of(bot).key, "allowed")
     if not rows:
         return await message.answer("Hali hech kimga ruxsat berilmagan.")
     lines = [f"{'🟢' if row_active(r) else '⚪️'} {user_label(r)} — {fmt_exp(r['expires_at'])}" for r in rows]
@@ -305,10 +363,10 @@ async def cmd_users(message: Message):
 
 
 @dp.message(Command("pending"))
-async def cmd_pending(message: Message):
+async def cmd_pending(message: Message, bot: Bot):
     if not is_admin(message.from_user.id):
         return
-    rows = await store.list("pending")
+    rows = await store.list(cfg_of(bot).key, "pending")
     if not rows:
         return await message.answer("Kutayotgan so'rov yo'q.")
     for r in rows[:20]:
@@ -316,7 +374,7 @@ async def cmd_pending(message: Message):
 
 
 @dp.message(Command("add"))
-async def cmd_add(message: Message, command: CommandObject):
+async def cmd_add(message: Message, command: CommandObject, bot: Bot):
     if not is_admin(message.from_user.id):
         return
     parts = (command.args or "").split()
@@ -325,7 +383,7 @@ async def cmd_add(message: Message, command: CommandObject):
     uid = int(parts[0])
     days = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0
     exp = datetime.now(timezone.utc) + timedelta(days=days) if days else None
-    await store.upsert(uid, status="allowed", expires_at=exp)
+    await store.upsert(cfg_of(bot).key, uid, status="allowed", expires_at=exp)
     await message.answer(f"✅ <code>{uid}</code> ga ruxsat berildi ({fmt_exp(exp)})", parse_mode="HTML")
     try:
         await bot.send_message(uid, "✅ Sizga ruxsat berildi. Testni boshlash uchun tugmani bosing 👇",
@@ -336,13 +394,13 @@ async def cmd_add(message: Message, command: CommandObject):
 
 
 @dp.message(Command("remove"))
-async def cmd_remove(message: Message, command: CommandObject):
+async def cmd_remove(message: Message, command: CommandObject, bot: Bot):
     if not is_admin(message.from_user.id):
         return
     arg = (command.args or "").strip()
     if not arg.isdigit():
         return await message.answer("Foydalanish: /remove 123456789")
-    await store.upsert(int(arg), status="denied", expires_at=None)
+    await store.upsert(cfg_of(bot).key, int(arg), status="denied", expires_at=None)
     await message.answer(f"⛔ <code>{arg}</code> ning ruxsati olib qo'yildi", parse_mode="HTML")
 
 
@@ -357,67 +415,74 @@ async def send_long(message: Message, text: str):
 
 
 @dp.message()
-async def fallback(message: Message):
-    if await has_access(message.from_user.id):
-        await send_menu(message.chat.id, "Testlar shu yerda 📚")
+async def fallback(message: Message, bot: Bot):
+    if await has_access(cfg_of(bot).key, message.from_user.id):
+        await send_menu(bot, message.chat.id, "Testlar shu yerda 📚")
     else:
-        await start(message)
+        await start(message, bot)
 
 
 # ================================================================ web server
-def check_init_data(init_data: str) -> Optional[int]:
-    """Telegram Mini App initData imzosini tekshiradi va foydalanuvchi ID sini
-    qaytaradi. Soxta yoki eskirgan bo'lsa - None."""
-    if not init_data or not BOT_TOKEN:
+def check_init_data(init_data: str) -> Optional[Tuple[BotCfg, int]]:
+    """Telegram Mini App initData imzosini tekshiradi. Qaysi bot tokeni bilan
+    imzolangan bo'lsa - o'sha bot va foydalanuvchi ID sini qaytaradi."""
+    if not init_data:
         return None
     try:
         pairs = dict(parse_qsl(init_data, keep_blank_values=True, strict_parsing=True))
     except ValueError:
         return None
     recv_hash = pairs.pop("hash", "")
-    check_string = "\n".join(f"{k}={v}" for k, v in sorted(pairs.items()))
-    secret = hmac.new(b"WebAppData", BOT_TOKEN.encode(), hashlib.sha256).digest()
-    calc = hmac.new(secret, check_string.encode(), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(calc, recv_hash):
-        return None
-    try:
-        if time.time() - int(pairs.get("auth_date", "0")) > INIT_DATA_MAX_AGE:
-            return None
-        return int(json.loads(pairs["user"])["id"])
-    except Exception:
-        return None
+    check_string = "\n".join(f"{k}={v}" for k, v in sorted(pairs.items())).encode()
+    for cfg in BOTS:
+        calc = hmac.new(cfg.secret, check_string, hashlib.sha256).hexdigest()
+        if hmac.compare_digest(calc, recv_hash):
+            try:
+                if time.time() - int(pairs.get("auth_date", "0")) > INIT_DATA_MAX_AGE:
+                    return None
+                return cfg, int(json.loads(pairs["user"])["id"])
+            except Exception:
+                return None
+    return None
 
 
-async def api_user(request) -> Optional[int]:
-    uid = check_init_data(request.headers.get("X-Init-Data", ""))
-    if uid is None:
-        return None
-    return uid
+async def api_auth(request):
+    """(cfg, uid) yoki xato javobi."""
+    res = check_init_data(request.headers.get("X-Init-Data", ""))
+    if res is None:
+        return None, web.json_response({"ok": False, "reason": "auth"}, status=401)
+    cfg, uid = res
+    if not await has_access(cfg.key, uid):
+        return None, web.json_response({"ok": False, "reason": "denied"}, status=403)
+    return res, None
 
 
 async def api_me(request):
-    uid = await api_user(request)
-    if uid is None:
-        return web.json_response({"ok": False, "reason": "auth"}, status=401)
-    if not await has_access(uid):
-        return web.json_response({"ok": False, "reason": "denied"}, status=403)
-    row = await store.get(uid)
+    res, err = await api_auth(request)
+    if err:
+        return err
+    cfg, uid = res
+    row = await store.get(cfg.key, uid)
     exp = row.get("expires_at") if row else None
-    return web.json_response({"ok": True, "admin": is_admin(uid), "expires_at": exp.isoformat() if exp else None})
+    m = load_manifest(cfg)
+    return web.json_response({
+        "ok": True, "bot": cfg.key, "admin": is_admin(uid),
+        "expires_at": exp.isoformat() if exp else None,
+        "title": m.get("title", "Test banklari"), "banks": m["banks"],
+    })
 
 
 BANK_KEY_RE = re.compile(r"^[A-Za-z0-9_]+$")
 
 
 async def api_bank(request):
-    uid = await api_user(request)
-    if uid is None:
-        return web.json_response({"ok": False, "reason": "auth"}, status=401)
-    if not await has_access(uid):
-        return web.json_response({"ok": False, "reason": "denied"}, status=403)
+    res, err = await api_auth(request)
+    if err:
+        return err
+    cfg, _ = res
     key = request.match_info["key"]
-    path = DATA_DIR / f"{key}.json"
-    if not BANK_KEY_RE.match(key) or not path.is_file():
+    path = cfg.data_dir / f"{key}.json"
+    if not BANK_KEY_RE.match(key) or key == "banks" or not path.is_file():
         return web.json_response({"ok": False, "reason": "notfound"}, status=404)
     return web.FileResponse(path)
 
@@ -448,24 +513,26 @@ async def start_webapp_server():
 
 
 async def main():
-    if not BOT_TOKEN:
+    if not BOTS:
         logging.warning("DIQQAT: BOT_TOKEN yo'q!")
-    if not ADMIN_IDS:
-        logging.warning("ADMIN_IDS yo'q - OCHIQ REJIM: bot hamma uchun ishlaydi, ruxsat tizimi o'chiq")
+    if OPEN_MODE:
+        logging.warning("ADMIN_IDS yo'q - OCHIQ REJIM: botlar hamma uchun ishlaydi, ruxsat tizimi o'chiq")
     await store.init()
     await start_webapp_server()
-    if bot:
-        url = get_webapp_url()
+    bots = [c.bot for c in BOTS if c.bot]
+    if not bots:
+        await asyncio.Event().wait()
+        return
+    url = get_webapp_url()
+    for b in bots:
         if url:
             try:
                 # Chap pastdagi menyu tugmasi - u ham initData beradi
-                await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Test", web_app=WebAppInfo(url=url)))
+                await b.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Test", web_app=WebAppInfo(url=url)))
             except Exception as e:
                 logging.warning("Menyu tugmasini o'rnatib bo'lmadi: %s", e)
-        await bot.delete_webhook(drop_pending_updates=True)
-        await dp.start_polling(bot)
-    else:
-        await asyncio.Event().wait()
+        await b.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(*bots)
 
 
 if __name__ == "__main__":

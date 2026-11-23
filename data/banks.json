@@ -1,0 +1,503 @@
+{
+ "title": "Test banklari",
+ "banks": [
+  {
+   "key": "bio_t1",
+   "title": "Biologiya — Mikroskop va hujayra tuzilishi",
+   "subject": "Biologiya",
+   "course": "Биология"
+  },
+  {
+   "key": "bio_t2",
+   "title": "Biologiya — Mitoz va meyoz (hujayra bo'linishi)",
+   "subject": "Biologiya",
+   "course": "Биология"
+  },
+  {
+   "key": "bio_t3",
+   "title": "Biologiya — Jinsga bog'liq irsiylanish",
+   "subject": "Biologiya",
+   "course": "Биология"
+  },
+  {
+   "key": "bio_t4",
+   "title": "Biologiya — Parazitologiya (gelmintlar)",
+   "subject": "Biologiya",
+   "course": "Биология"
+  },
+  {
+   "key": "chem_A1",
+   "title": "Kimyo — A1",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A2",
+   "title": "Kimyo — A2",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A3",
+   "title": "Kimyo — A3",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A4",
+   "title": "Kimyo — A4",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A5",
+   "title": "Kimyo — A5",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A6",
+   "title": "Kimyo — A6",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A7",
+   "title": "Kimyo — A7",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A8",
+   "title": "Kimyo — A8",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A10",
+   "title": "Kimyo — A10",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A11",
+   "title": "Kimyo — A11",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A12",
+   "title": "Kimyo — A12",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A13",
+   "title": "Kimyo — A13",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A15",
+   "title": "Kimyo — A15",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A17",
+   "title": "Kimyo — A17",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A18",
+   "title": "Kimyo — A18",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A19",
+   "title": "Kimyo — A19",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A20",
+   "title": "Kimyo — A20",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A21",
+   "title": "Kimyo — A21",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A22",
+   "title": "Kimyo — A22",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_A23",
+   "title": "Kimyo — A23",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B1",
+   "title": "Kimyo — B1",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B2",
+   "title": "Kimyo — B2",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B3",
+   "title": "Kimyo — B3",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B4",
+   "title": "Kimyo — B4",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B5",
+   "title": "Kimyo — B5",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B7",
+   "title": "Kimyo — B7",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B8",
+   "title": "Kimyo — B8",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B10",
+   "title": "Kimyo — B10",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B11",
+   "title": "Kimyo — B11",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B12",
+   "title": "Kimyo — B12",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B13",
+   "title": "Kimyo — B13",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B14",
+   "title": "Kimyo — B14",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B15",
+   "title": "Kimyo — B15",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B16",
+   "title": "Kimyo — B16",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B17",
+   "title": "Kimyo — B17",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B18",
+   "title": "Kimyo — B18",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B19",
+   "title": "Kimyo — B19",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B20",
+   "title": "Kimyo — B20",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B21",
+   "title": "Kimyo — B21",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B22",
+   "title": "Kimyo — B22",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "chem_B23",
+   "title": "Kimyo — B23",
+   "subject": "Kimyo",
+   "course": "Химия"
+  },
+  {
+   "key": "medchem_t1",
+   "title": "Мед.химия — Тема 1",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t2",
+   "title": "Мед.химия — Тема 2",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t3",
+   "title": "Мед.химия — Тема 3",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t4",
+   "title": "Мед.химия — Тема 4",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t5",
+   "title": "Мед.химия — Тема 5",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t6",
+   "title": "Мед.химия — Тема 6",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t7",
+   "title": "Мед.химия — Тема 7",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t8",
+   "title": "Мед.химия — Тема 8",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t10",
+   "title": "Мед.химия — Тема 10",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t11",
+   "title": "Мед.химия — Тема 11",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t12",
+   "title": "Мед.химия — Тема 12",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t13",
+   "title": "Мед.химия — Тема 13",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t14",
+   "title": "Мед.химия — Тема 14",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t15",
+   "title": "Мед.химия — Тема 15",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t16",
+   "title": "Мед.химия — Тема 16",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t17",
+   "title": "Мед.химия — Тема 17",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t18",
+   "title": "Мед.химия — Тема 18",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t19",
+   "title": "Мед.химия — Тема 19",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t20",
+   "title": "Мед.химия — Тема 20",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t21",
+   "title": "Мед.химия — Тема 21",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t22",
+   "title": "Мед.химия — Тема 22",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medchem_t23",
+   "title": "Мед.химия — Тема 23",
+   "subject": "Мед.химия",
+   "course": "Медицинская химия"
+  },
+  {
+   "key": "medbio_t2",
+   "title": "Мед.биология — Тема 2: Вирусы. Про- и эукариотические клетки. Их общее сх…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t3",
+   "title": "Мед.биология — Тема 3: Молекулярные основы жизни. Нуклеиновые кислоты и и…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t4",
+   "title": "Мед.биология — Тема 4: Жизненный цикл клеток. Митотическое деление клеток…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t6",
+   "title": "Мед.биология — Тема 6: Ди- и полигибридное скрещивание. Множественный алл…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t7",
+   "title": "Мед.биология — Тема 7: Хромосомная теория наследственности. Т.Г.Морган. С…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t8",
+   "title": "Мед.биология — Тема 8: Изменчивость и её виды. Наследственная и ненаследс…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t10",
+   "title": "Мед.биология — Тема 10: Методы изучения генетики человека: дерматоглифичес…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t12",
+   "title": "Мед.биология — Тема 12: Генные болезни. Медико-генетическое консультирован…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t13",
+   "title": "Мед.биология — Тема 13: Общие закономерности проэмбрионального и эмбрионал…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t14",
+   "title": "Мед.биология — Тема 14: Онто-филогенез органов систем: покровной, опорно-д…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t15",
+   "title": "Мед.биология — Тема 15: . Тип: Жгутиковые- паразиты человека: трипаносома,…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t16",
+   "title": "Мед.биология — Тема 16: Споровики паразиты человека. Малярийный плазмодий,…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t19",
+   "title": "Мед.биология — Тема 19: Ленточные черви - паразиты человека: широкий ленте…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t21",
+   "title": "Мед.биология — Тема 21: Круглые черви: Изучение представителей круглых чер…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t23",
+   "title": "Мед.биология — Тема 23: Насекомые имеющие медицинское значение: Вши, клопы…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  },
+  {
+   "key": "medbio_t24",
+   "title": "Мед.биология — Тема 24: Ядовитые животные. Изучение оказания первой помощи…",
+   "subject": "Мед.биология",
+   "course": "Медицинская биология"
+  }
+ ]
+}

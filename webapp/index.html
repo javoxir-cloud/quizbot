@@ -283,7 +283,7 @@
 
 <!-- 1. Bosh sahifa: banklar ro'yxati -->
 <div id="screen-home" class="screen active">
-  <div class="m-banner home-banner"><div class="m-course">Test banklari</div><div class="m-crumb">Mashq testi va imtihon rejimi</div></div>
+  <div class="m-banner home-banner"><div class="m-course" id="home-title">Test banklari</div><div class="m-crumb">Mashq testi va imtihon rejimi</div></div>
   <div class="summary" id="home-summary"></div>
   <input class="search" id="bank-search" placeholder="🔍 Bank qidirish..." />
   <div class="chips-row" id="subject-chips"></div>
@@ -418,93 +418,11 @@ if (tg) {
   } catch (e) {}
 }
 
-const BANKS = [
-  { key: 'bio_t1', title: 'Biologiya — Mikroskop va hujayra tuzilishi (46 savol)', file: 'bio_t1.json' },
-  { key: 'bio_t2', title: 'Biologiya — Mitoz va meyoz (hujayra bo\'linishi) (36 savol)', file: 'bio_t2.json' },
-  { key: 'bio_t3', title: 'Biologiya — Jinsga bog\'liq irsiylanish (33 savol)', file: 'bio_t3.json' },
-  { key: 'bio_t4', title: 'Biologiya — Parazitologiya (gelmintlar) (54 savol)', file: 'bio_t4.json' },
-  { key: 'chem_A1', title: 'Kimyo — A1 (22 savol)', file: 'chem_A1.json' },
-  { key: 'chem_A2', title: 'Kimyo — A2 (47 savol)', file: 'chem_A2.json' },
-  { key: 'chem_A3', title: 'Kimyo — A3 (30 savol)', file: 'chem_A3.json' },
-  { key: 'chem_A4', title: 'Kimyo — A4 (33 savol)', file: 'chem_A4.json' },
-  { key: 'chem_A5', title: 'Kimyo — A5 (31 savol)', file: 'chem_A5.json' },
-  { key: 'chem_A6', title: 'Kimyo — A6 (25 savol)', file: 'chem_A6.json' },
-  { key: 'chem_A7', title: 'Kimyo — A7 (33 savol)', file: 'chem_A7.json' },
-  { key: 'chem_A8', title: 'Kimyo — A8 (59 savol)', file: 'chem_A8.json' },
-  { key: 'chem_A10', title: 'Kimyo — A10 (22 savol)', file: 'chem_A10.json' },
-  { key: 'chem_A11', title: 'Kimyo — A11 (31 savol)', file: 'chem_A11.json' },
-  { key: 'chem_A12', title: 'Kimyo — A12 (15 savol)', file: 'chem_A12.json' },
-  { key: 'chem_A13', title: 'Kimyo — A13 (24 savol)', file: 'chem_A13.json' },
-  { key: 'chem_A15', title: 'Kimyo — A15 (12 savol)', file: 'chem_A15.json' },
-  { key: 'chem_A17', title: 'Kimyo — A17 (20 savol)', file: 'chem_A17.json' },
-  { key: 'chem_A18', title: 'Kimyo — A18 (30 savol)', file: 'chem_A18.json' },
-  { key: 'chem_A19', title: 'Kimyo — A19 (27 savol)', file: 'chem_A19.json' },
-  { key: 'chem_A20', title: 'Kimyo — A20 (20 savol)', file: 'chem_A20.json' },
-  { key: 'chem_A21', title: 'Kimyo — A21 (20 savol)', file: 'chem_A21.json' },
-  { key: 'chem_A22', title: 'Kimyo — A22 (56 savol)', file: 'chem_A22.json' },
-  { key: 'chem_A23', title: 'Kimyo — A23 (59 savol)', file: 'chem_A23.json' },
-  { key: 'chem_B1', title: 'Kimyo — B1 (5 savol)', file: 'chem_B1.json' },
-  { key: 'chem_B2', title: 'Kimyo — B2 (5 savol)', file: 'chem_B2.json' },
-  { key: 'chem_B3', title: 'Kimyo — B3 (5 savol)', file: 'chem_B3.json' },
-  { key: 'chem_B4', title: 'Kimyo — B4 (5 savol)', file: 'chem_B4.json' },
-  { key: 'chem_B5', title: 'Kimyo — B5 (10 savol)', file: 'chem_B5.json' },
-  { key: 'chem_B7', title: 'Kimyo — B7 (5 savol)', file: 'chem_B7.json' },
-  { key: 'chem_B8', title: 'Kimyo — B8 (5 savol)', file: 'chem_B8.json' },
-  { key: 'chem_B10', title: 'Kimyo — B10 (5 savol)', file: 'chem_B10.json' },
-  { key: 'chem_B11', title: 'Kimyo — B11 (5 savol)', file: 'chem_B11.json' },
-  { key: 'chem_B12', title: 'Kimyo — B12 (2 savol)', file: 'chem_B12.json' },
-  { key: 'chem_B13', title: 'Kimyo — B13 (5 savol)', file: 'chem_B13.json' },
-  { key: 'chem_B14', title: 'Kimyo — B14 (6 savol)', file: 'chem_B14.json' },
-  { key: 'chem_B15', title: 'Kimyo — B15 (5 savol)', file: 'chem_B15.json' },
-  { key: 'chem_B16', title: 'Kimyo — B16 (5 savol)', file: 'chem_B16.json' },
-  { key: 'chem_B17', title: 'Kimyo — B17 (5 savol)', file: 'chem_B17.json' },
-  { key: 'chem_B18', title: 'Kimyo — B18 (5 savol)', file: 'chem_B18.json' },
-  { key: 'chem_B19', title: 'Kimyo — B19 (5 savol)', file: 'chem_B19.json' },
-  { key: 'chem_B20', title: 'Kimyo — B20 (5 savol)', file: 'chem_B20.json' },
-  { key: 'chem_B21', title: 'Kimyo — B21 (5 savol)', file: 'chem_B21.json' },
-  { key: 'chem_B22', title: 'Kimyo — B22 (5 savol)', file: 'chem_B22.json' },
-  { key: 'chem_B23', title: 'Kimyo — B23 (5 savol)', file: 'chem_B23.json' },
-  { key: 'medchem_t1', title: 'Мед.химия — Тема 1 (27 savol)', file: 'medchem_t1.json' },
-  { key: 'medchem_t2', title: 'Мед.химия — Тема 2 (54 savol)', file: 'medchem_t2.json' },
-  { key: 'medchem_t3', title: 'Мед.химия — Тема 3 (60 savol)', file: 'medchem_t3.json' },
-  { key: 'medchem_t4', title: 'Мед.химия — Тема 4 (43 savol)', file: 'medchem_t4.json' },
-  { key: 'medchem_t5', title: 'Мед.химия — Тема 5 (41 savol)', file: 'medchem_t5.json' },
-  { key: 'medchem_t6', title: 'Мед.химия — Тема 6 (35 savol)', file: 'medchem_t6.json' },
-  { key: 'medchem_t7', title: 'Мед.химия — Тема 7 (43 savol)', file: 'medchem_t7.json' },
-  { key: 'medchem_t8', title: 'Мед.химия — Тема 8 (109 savol)', file: 'medchem_t8.json' },
-  { key: 'medchem_t10', title: 'Мед.химия — Тема 10 (32 savol)', file: 'medchem_t10.json' },
-  { key: 'medchem_t11', title: 'Мед.химия — Тема 11 (41 savol)', file: 'medchem_t11.json' },
-  { key: 'medchem_t12', title: 'Мед.химия — Тема 12 (10 savol)', file: 'medchem_t12.json' },
-  { key: 'medchem_t13', title: 'Мед.химия — Тема 13 (36 savol)', file: 'medchem_t13.json' },
-  { key: 'medchem_t14', title: 'Мед.химия — Тема 14 (30 savol)', file: 'medchem_t14.json' },
-  { key: 'medchem_t15', title: 'Мед.химия — Тема 15 (22 savol)', file: 'medchem_t15.json' },
-  { key: 'medchem_t16', title: 'Мед.химия — Тема 16 (22 savol)', file: 'medchem_t16.json' },
-  { key: 'medchem_t17', title: 'Мед.химия — Тема 17 (30 savol)', file: 'medchem_t17.json' },
-  { key: 'medchem_t18', title: 'Мед.химия — Тема 18 (40 savol)', file: 'medchem_t18.json' },
-  { key: 'medchem_t19', title: 'Мед.химия — Тема 19 (37 savol)', file: 'medchem_t19.json' },
-  { key: 'medchem_t20', title: 'Мед.химия — Тема 20 (30 savol)', file: 'medchem_t20.json' },
-  { key: 'medchem_t21', title: 'Мед.химия — Тема 21 (30 savol)', file: 'medchem_t21.json' },
-  { key: 'medchem_t22', title: 'Мед.химия — Тема 22 (66 savol)', file: 'medchem_t22.json' },
-  { key: 'medchem_t23', title: 'Мед.химия — Тема 23 (65 savol)', file: 'medchem_t23.json' },
-  { key: 'medbio_t2', title: 'Мед.биология — Тема 2: Вирусы. Про- и эукариотические клетки. Их общее сх…', file: 'medbio_t2.json' },
-  { key: 'medbio_t3', title: 'Мед.биология — Тема 3: Молекулярные основы жизни. Нуклеиновые кислоты и и…', file: 'medbio_t3.json' },
-  { key: 'medbio_t4', title: 'Мед.биология — Тема 4: Жизненный цикл клеток. Митотическое деление клеток…', file: 'medbio_t4.json' },
-  { key: 'medbio_t6', title: 'Мед.биология — Тема 6: Ди- и полигибридное скрещивание. Множественный алл…', file: 'medbio_t6.json' },
-  { key: 'medbio_t7', title: 'Мед.биология — Тема 7: Хромосомная теория наследственности. Т.Г.Морган. С…', file: 'medbio_t7.json' },
-  { key: 'medbio_t8', title: 'Мед.биология — Тема 8: Изменчивость и её виды. Наследственная и ненаследс…', file: 'medbio_t8.json' },
-  { key: 'medbio_t10', title: 'Мед.биология — Тема 10: Методы изучения генетики человека: дерматоглифичес…', file: 'medbio_t10.json' },
-  { key: 'medbio_t12', title: 'Мед.биология — Тема 12: Генные болезни. Медико-генетическое консультирован…', file: 'medbio_t12.json' },
-  { key: 'medbio_t13', title: 'Мед.биология — Тема 13: Общие закономерности проэмбрионального и эмбрионал…', file: 'medbio_t13.json' },
-  { key: 'medbio_t14', title: 'Мед.биология — Тема 14: Онто-филогенез органов систем: покровной, опорно-д…', file: 'medbio_t14.json' },
-  { key: 'medbio_t15', title: 'Мед.биология — Тема 15: . Тип: Жгутиковые- паразиты человека: трипаносома,…', file: 'medbio_t15.json' },
-  { key: 'medbio_t16', title: 'Мед.биология — Тема 16: Споровики паразиты человека. Малярийный плазмодий,…', file: 'medbio_t16.json' },
-  { key: 'medbio_t19', title: 'Мед.биология — Тема 19: Ленточные черви - паразиты человека: широкий ленте…', file: 'medbio_t19.json' },
-  { key: 'medbio_t21', title: 'Мед.биология — Тема 21: Круглые черви: Изучение представителей круглых чер…', file: 'medbio_t21.json' },
-  { key: 'medbio_t23', title: 'Мед.биология — Тема 23: Насекомые имеющие медицинское значение: Вши, клопы…', file: 'medbio_t23.json' },
-  { key: 'medbio_t24', title: 'Мед.биология — Тема 24: Ядовитые животные. Изучение оказания первой помощи…', file: 'medbio_t24.json' },
-];
+// Banklar ro'yxati serverdan keladi (/api/me) - har bir botning o'z banklari bor
+let BANKS = [];
+let BOT_KEY = 'main';
 
-const SUBJECTS = { bio: 'Biologiya', chem: 'Kimyo', medchem: 'Мед.химия', medbio: 'Мед.биология' };
+let SUBJECTS = {}; // fan nomi -> fan nomi (banks.json dagi 'subject')
 const subjOf = (key) => key.split('_')[0];
 const $ = (id) => document.getElementById(id);
 
@@ -544,7 +462,8 @@ function cleanTitle(t) { return t.replace(/\s*\(\d+ savol\)\s*$/, ''); }
    Savollar bankdagi tartib raqami (0 dan) bilan saqlanadi. */
 const Store = {
   data: {},
-  k(b) { return 'qb_' + b; },
+  prefix() { return BOT_KEY === 'main' ? 'qb_' : 'qb_' + BOT_KEY + '_'; },
+  k(b) { return this.prefix() + b; },
   norm(v) {
     v = v || {};
     return { c: v.c || [], w: v.w || [], f: v.f || [], h: v.h || [], t: v.t || 0 };
@@ -600,7 +519,7 @@ const Store = {
               if (!vals[key]) return;
               try {
                 const cv = this.norm(JSON.parse(vals[key]));
-                const bk = key.slice(3);
+                const bk = key.slice(this.prefix().length);
                 const lv = this.get(bk);
                 if (cv.t > lv.t) {
                   this.data[bk] = cv;
@@ -687,10 +606,14 @@ async function loadBanks() {
   $('bank-list').innerHTML = '<div class="empty">Yuklanmoqda...</div>';
   try {
     const me = await api('/api/me');
-    if (!me.ok) {
-      const j = await me.json().catch(() => ({}));
-      return showLocked(j.reason || 'denied');
-    }
+    const j = await me.json().catch(() => ({}));
+    if (!me.ok) return showLocked(j.reason || 'denied');
+    BANKS = j.banks || [];
+    BOT_KEY = j.bot || 'main';
+    SUBJECTS = {};
+    BANKS.forEach(b => { if (b.subject) SUBJECTS[b.subject] = b.subject; });
+    if (j.title) { $('home-title').textContent = j.title; document.title = j.title; }
+    if (!BANKS.length) { $('bank-list').innerHTML = '<div class="empty">Hozircha savollar qo\'shilmagan.</div>'; return; }
   } catch (e) {
     $('bank-list').innerHTML = '<div class="empty">Server bilan aloqa yo\'q. Birozdan keyin qayta oching.</div>';
     return;
@@ -711,6 +634,7 @@ async function loadBanks() {
 function renderSubjectChips() {
   const row = $('subject-chips');
   row.innerHTML = '';
+  row.classList.toggle('hidden', Object.keys(SUBJECTS).length < 2);
   const items = [['all', 'Hammasi']].concat(Object.entries(SUBJECTS));
   items.forEach(([k, label]) => {
     const c = el('button', 'fchip' + (subjectFilter === k ? ' active' : ''), label);
@@ -728,7 +652,7 @@ function renderBankList() {
     const n = (questionBanks[b.key] || []).length;
     const d = Store.get(b.key);
     totQ += n; totC += d.c.length; totW += d.w.length; totF += d.f.length;
-    if (subjectFilter !== 'all' && subjOf(b.key) !== subjectFilter) return;
+    if (subjectFilter !== 'all' && b.subject !== subjectFilter) return;
     if (q && !b.title.toLowerCase().includes(q)) return;
 
     const card = el('div', 'bank-card');
@@ -864,7 +788,6 @@ $('s-start').onclick = () => {
 /* ================= Test jarayoni (Moodle uslubida) ================= */
 let S = null; // joriy sessiya
 let lastSetup = null;
-const COURSE_NAMES = { bio: 'Биология', chem: 'Химия', medchem: 'Медицинская химия', medbio: 'Медицинская биология' };
 const LETTERS = 'abcdefghij';
 
 function setMoodleChrome(on) {
@@ -875,7 +798,7 @@ function setMoodleChrome(on) {
   } catch (e) {}
 }
 function fillBanner(prefix, bankKey, extra) {
-  $(prefix + 'course').textContent = COURSE_NAMES[subjOf(bankKey)] || 'Тест';
+  $(prefix + 'course').textContent = bankByKey(bankKey).course || bankByKey(bankKey).subject || 'Тест';
   $(prefix + 'crumb').textContent = cleanTitle(bankByKey(bankKey).title) + (extra ? ' · ' + extra : '');
 }
 const MOODLE_SCREENS = ['screen-quiz', 'screen-summary', 'screen-result'];
