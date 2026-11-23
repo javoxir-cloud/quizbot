@@ -42,6 +42,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 # Adminlar: Telegram ID lari vergul bilan, masalan: ADMIN_IDS=123456789,987654321
 ADMIN_IDS = {int(x) for x in re.findall(r"\d+", os.getenv("ADMIN_IDS", ""))}
+# ADMIN_IDS berilmagan bo'lsa - ochiq rejim: hamma foydalana oladi (avvalgidek).
+# ADMIN_IDS qo'yilishi bilan ruxsat tizimi o'zi yoqiladi.
+OPEN_MODE = not ADMIN_IDS
 # Mini App ochilgandan keyin initData qancha vaqt amal qiladi (soniya)
 INIT_DATA_MAX_AGE = 7 * 24 * 3600
 
@@ -159,6 +162,8 @@ def row_active(row: Optional[dict]) -> bool:
 
 
 async def has_access(uid: int) -> bool:
+    if OPEN_MODE:
+        return True
     return is_admin(uid) or row_active(await store.get(uid))
 
 
@@ -437,7 +442,7 @@ async def main():
     if not BOT_TOKEN:
         logging.warning("DIQQAT: BOT_TOKEN yo'q!")
     if not ADMIN_IDS:
-        logging.warning("DIQQAT: ADMIN_IDS yo'q - hech kim ruxsat bera olmaydi!")
+        logging.warning("ADMIN_IDS yo'q - OCHIQ REJIM: bot hamma uchun ishlaydi, ruxsat tizimi o'chiq")
     await store.init()
     await start_webapp_server()
     if bot:
