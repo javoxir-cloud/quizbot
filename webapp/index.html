@@ -194,6 +194,87 @@
   .big-bar .bad { background: var(--bad); }
   .hist-row { display: flex; justify-content: space-between; background: var(--card); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; font-size: 14px; }
   .empty { text-align: center; color: var(--hint); padding: 30px 10px; }
+
+  /* ================= Moodle uslubi (test, yakunlash, natija ekranlari) ================= */
+  body.moodle { background: #f2f2f2; color: #1d2125; }
+  body.moodle .screen.mscreen { padding: 0 0 40px; max-width: 760px; }
+  .m-page { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #1d2125; font-size: 15px; }
+  .m-banner {
+    background: linear-gradient(100deg, #0c3fb8 0%, #1565d8 45%, #3b8fe8 100%);
+    color: #fff; padding: 22px 16px 26px; position: relative; overflow: hidden;
+  }
+  .m-banner::after {
+    content: ""; position: absolute; right: -40px; top: -60px; width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.18), rgba(255,255,255,0) 70%);
+  }
+  .m-banner .m-course { font-size: 27px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; line-height: 1.15; }
+  .m-banner .m-crumb { font-size: 13px; opacity: .85; margin-top: 6px; }
+  .m-topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: #fff; border-bottom: 1px solid #dee2e6; }
+  .m-link { color: #0f6cbf; background: none; border: none; font-size: 14px; padding: 4px 0; cursor: pointer; text-decoration: none; }
+  .m-link:active { text-decoration: underline; }
+  .m-timer { border: 1px solid #dee2e6; background: #fff; border-radius: 4px; padding: 5px 10px; font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .m-timer.low { background: #f8d7da; border-color: #f1aeb5; color: #842029; font-weight: 600; }
+  .m-body { padding: 12px; }
+
+  .que { margin-bottom: 14px; }
+  .que .info {
+    background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 8px 10px; margin-bottom: 8px;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; font-size: 13px; color: #495057;
+  }
+  .que .info .no { font-size: 15px; color: #1d2125; margin: 0; font-weight: 400; width: 100%; }
+  .que .info .no b { font-size: 21px; font-weight: 700; }
+  .que .info .flag { color: #0f6cbf; cursor: pointer; background: none; border: none; padding: 0; font-size: 13px; }
+  .que .info .flag.on { color: #ca3120; }
+  .que .formulation { background: #e7f3f5; border: 1px solid #b8dce2; border-radius: 4px; padding: 14px 14px 10px; color: #001a1e; }
+  .que .qtext { font-size: 16px; line-height: 1.45; margin-bottom: 16px; }
+  .que .prompt { font-size: 14.5px; margin-bottom: 8px; }
+  .que .ans-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 4px; border-radius: 4px; cursor: pointer; line-height: 1.4; }
+  .que .ans-row input { width: 17px; height: 17px; margin: 2px 0 0; flex: 0 0 auto; accent-color: #0f6cbf; }
+  .que .ans-row .lbl { flex: 1; }
+  .que .ans-row .mk { flex: 0 0 auto; font-weight: 700; width: 18px; text-align: center; }
+  .que .ans-row.correct { background: #d4edda; }
+  .que .ans-row.correct .mk { color: #357a32; }
+  .que .ans-row.incorrect { background: #f8d7da; }
+  .que .ans-row.incorrect .mk { color: #ca3120; }
+  .que.locked .ans-row { cursor: default; }
+  .que .outcome { background: #fcefdc; border: 1px solid #fbe0b9; border-radius: 4px; padding: 10px 14px; margin-top: 8px; color: #7d5a29; font-size: 14.5px; line-height: 1.4; }
+  .que .outcome .fb-ok { color: #357a32; font-weight: 600; }
+  .que .outcome .fb-bad { color: #ca3120; font-weight: 600; }
+
+  .m-btns { display: flex; justify-content: space-between; gap: 10px; margin: 6px 0 16px; }
+  .m-btn {
+    border: 1px solid transparent; border-radius: 6px; padding: 9px 16px; font-size: 15px; cursor: pointer;
+    background: #0f6cbf; color: #fff; font-family: inherit;
+  }
+  .m-btn:active { background: #0c5699; }
+  .m-btn.sec { background: #ced4da; color: #1d2125; }
+  .m-btn.sec:active { background: #b8c0c8; }
+  .m-btn.ghost { background: #fff; color: #0f6cbf; border-color: #0f6cbf; }
+  .m-btn:disabled { opacity: .5; }
+  .m-btn.full { width: 100%; margin-top: 8px; }
+
+  .m-block { background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px; margin-top: 6px; }
+  .m-block h5 { margin: 0 0 10px; font-size: 16px; font-weight: 700; }
+  .qn-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .qnbutton {
+    width: 34px; height: 40px; border: 1px solid #ced4da; border-radius: 3px; background: #fff; color: #1d2125;
+    font-size: 13px; cursor: pointer; position: relative; overflow: hidden; padding: 0 0 12px; font-family: inherit;
+  }
+  .qnbutton::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background: transparent; border-top: 1px solid #e9ecef; }
+  .qnbutton.answered::after { background: #ced4da; }
+  .qnbutton.correct::after { background: #357a32; }
+  .qnbutton.incorrect::after { background: #ca3120; }
+  .qnbutton.thispage { border: 2px solid #1d2125; font-weight: 700; }
+  .qnbutton.flagged::before { content: ""; position: absolute; right: 0; top: 0; border-left: 9px solid transparent; border-top: 9px solid #ca3120; }
+  .m-block .m-link { margin-top: 10px; display: inline-block; }
+
+  .m-h2 { font-size: 21px; font-weight: 600; margin: 4px 0 12px; }
+  .m-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; margin-bottom: 14px; }
+  .m-table th, .m-table td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; vertical-align: top; }
+  .m-table th { background: #f8f9fa; font-weight: 600; width: 42%; }
+  .m-table.m-sumtbl th { width: auto; }
+  .m-table tr.unans td { color: #ca3120; }
+  .m-note { font-size: 13.5px; color: #495057; margin: 8px 0; }
 </style>
 </head>
 <body>
@@ -207,46 +288,51 @@
   <div id="bank-list"></div>
 </div>
 
-<!-- 2. Test jarayoni -->
-<div id="screen-quiz" class="screen">
-  <div class="q-header">
-    <button class="icon-btn" id="quiz-back">←</button>
-    <div class="mid">
-      <div class="mode" id="quiz-mode"></div>
-      <div class="bt" id="quiz-bank"></div>
-    </div>
-    <div class="right">
-      <div class="timer" id="quiz-timer"></div>
-      <div id="quiz-count"></div>
-    </div>
+<!-- 2. Test jarayoni (Moodle uslubida) -->
+<div id="screen-quiz" class="screen mscreen m-page">
+  <div class="m-banner"><div class="m-course" id="m-course"></div><div class="m-crumb" id="m-crumb"></div></div>
+  <div class="m-topbar">
+    <button class="m-link" id="quiz-back">← Выйти из теста</button>
+    <div class="m-timer hidden" id="quiz-timer"></div>
   </div>
-  <div class="nav-strip" id="nav-strip"></div>
-  <div class="q-card">
-    <div class="q-text"><span class="q-num" id="q-num"></span><div id="q-text"></div></div>
-    <div id="options"></div>
-    <div class="q-foot">
-      <button class="fav-btn" id="q-fav">♡</button>
-      <span class="st" id="q-stat"></span>
+  <div class="m-body">
+    <div id="que-box"></div>
+    <div class="m-btns">
+      <button class="m-btn sec" id="btn-prev">Предыдущая страница</button>
+      <button class="m-btn" id="btn-next">Следующая страница</button>
     </div>
-  </div>
-  <div class="bottom-bar">
-    <div class="inner">
-      <button class="btn secondary sm" id="btn-prev">←</button>
-      <button class="btn" id="btn-next">Keyingisi →</button>
+    <div class="m-block">
+      <h5>Навигация по тесту</h5>
+      <div class="qn-grid" id="nav-strip"></div>
+      <button class="m-link" id="btn-finish-link">Закончить попытку...</button>
     </div>
   </div>
 </div>
 
-<!-- 3. Natija -->
-<div id="screen-result" class="screen">
-  <div class="title" style="text-align:center">Test tugadi!</div>
-  <div class="result-score" id="result-score">0/0</div>
-  <div class="result-sub" id="result-sub"></div>
-  <div class="stat-grid" id="result-grid"></div>
-  <button class="btn" id="btn-retry-wrong">🔁 Xatolarni qayta ishlash</button>
-  <button class="btn secondary" id="btn-retry">Qaytadan boshlash</button>
-  <button class="btn secondary" id="btn-res-home">⬅️ Banklarga qaytish</button>
-  <div id="result-review"></div>
+<!-- 2b. Yakunlash oldidan (Moodle "Результат попытки") -->
+<div id="screen-summary" class="screen mscreen m-page">
+  <div class="m-banner"><div class="m-course" id="s-course"></div><div class="m-crumb" id="s-crumb"></div></div>
+  <div class="m-body">
+    <div class="m-h2">Результат попытки</div>
+    <table class="m-table m-sumtbl"><thead><tr><th>Вопрос</th><th>Состояние</th></tr></thead><tbody id="sum-rows"></tbody></table>
+    <button class="m-btn sec full" id="btn-sum-back">Вернуться к попытке</button>
+    <div class="m-note" id="sum-note"></div>
+    <button class="m-btn full" id="btn-sum-submit">Отправить всё и завершить тест</button>
+  </div>
+</div>
+
+<!-- 3. Natija (Moodle "Просмотр попытки") -->
+<div id="screen-result" class="screen mscreen m-page">
+  <div class="m-banner"><div class="m-course" id="r-course"></div><div class="m-crumb" id="r-crumb"></div></div>
+  <div class="m-body">
+    <table class="m-table" id="result-table"></table>
+    <button class="m-btn full" id="btn-retry-wrong">Xatolarni qayta ishlash</button>
+    <div class="m-btns" style="margin-top:8px">
+      <button class="m-btn sec" id="btn-retry" style="flex:1">Qaytadan</button>
+      <button class="m-btn ghost" id="btn-res-home" style="flex:1">Banklarga qaytish</button>
+    </div>
+    <div id="result-review"></div>
+  </div>
 </div>
 
 <!-- 4. Ko'rish (barcha savollar + to'g'ri javoblar) -->
@@ -557,6 +643,8 @@ function goBack() {
   const sh = openSheetId();
   if (sh) return closeSheet(sh);
   if (currentScreen === 'screen-quiz') return confirmLeaveQuiz();
+  if (currentScreen === 'screen-summary') { showScreen('screen-quiz'); return renderQuestion(); }
+  if (currentScreen === 'screen-result') { S = null; showScreen('screen-home'); return renderBankList(); }
   if (currentScreen === 'screen-view' || currentScreen === 'screen-stats') {
     showScreen('screen-home'); renderBankList(); return openBankMenu(currentBankKey);
   }
@@ -776,9 +864,26 @@ $('s-start').onclick = () => {
   startSession(currentBankKey, setupMode, s.shuffleQ ? shuffle(s.idxs) : s.idxs, s);
 };
 
-/* ================= Test jarayoni ================= */
+/* ================= Test jarayoni (Moodle uslubida) ================= */
 let S = null; // joriy sessiya
 let lastSetup = null;
+const COURSE_NAMES = { bio: 'Биология', chem: 'Химия', medchem: 'Медицинская химия', medbio: 'Медицинская биология' };
+const LETTERS = 'abcdefghij';
+
+function setMoodleChrome(on) {
+  document.body.classList.toggle('moodle', on);
+  try {
+    if (tg && tg.setHeaderColor) tg.setHeaderColor(on ? '#ffffff' : '#12181f');
+    if (tg && tg.setBackgroundColor) tg.setBackgroundColor(on ? '#f2f2f2' : '#12181f');
+  } catch (e) {}
+}
+function fillBanner(prefix, bankKey, extra) {
+  $(prefix + 'course').textContent = COURSE_NAMES[subjOf(bankKey)] || 'Тест';
+  $(prefix + 'crumb').textContent = cleanTitle(bankByKey(bankKey).title) + (extra ? ' · ' + extra : '');
+}
+const MOODLE_SCREENS = ['screen-quiz', 'screen-summary', 'screen-result'];
+const _showScreen = showScreen;
+showScreen = function (id) { setMoodleChrome(MOODLE_SCREENS.includes(id)); _showScreen(id); };
 
 function startSession(bankKey, mode, idxs, opts) {
   const pool = questionBanks[bankKey] || [];
@@ -793,11 +898,11 @@ function startSession(bankKey, mode, idxs, opts) {
     cur: 0,
     timeLimit: opts.timeLimit || 0,
     startedAt: Date.now(),
+    finishedAt: null,
     timerId: null,
     finished: false,
   };
-  $('quiz-mode').textContent = mode === 'exam' ? 'Imtihon' : 'Mashq testi';
-  $('quiz-bank').textContent = cleanTitle(bankByKey(bankKey).title);
+  fillBanner('m-', bankKey, mode === 'exam' ? 'Imtihon' : 'Mashq');
   showScreen('screen-quiz');
   buildNavStrip();
   renderQuestion();
@@ -805,68 +910,93 @@ function startSession(bankKey, mode, idxs, opts) {
 }
 
 function isCorrect(item) { return item.chosen !== null && item.chosen.trim() === item.correct.trim(); }
+function revealed(item) { return S.mode === 'train' && item.chosen !== null; }
 
 function buildNavStrip() {
-  const strip = $('nav-strip');
-  strip.innerHTML = '';
+  const grid = $('nav-strip');
+  grid.innerHTML = '';
   S.items.forEach((_, i) => {
-    const b = el('button', 'nav-num', String(i + 1));
-    b.onclick = () => { S.cur = i; renderQuestion(); };
-    strip.appendChild(b);
+    const b = el('button', 'qnbutton', String(i + 1));
+    b.onclick = () => { S.cur = i; renderQuestion(); window.scrollTo(0, 0); };
+    grid.appendChild(b);
   });
 }
 function updateNavStrip() {
   const btns = $('nav-strip').children;
   S.items.forEach((it, i) => {
-    const b = btns[i];
-    let cls = 'nav-num';
-    if (it.chosen !== null) cls += S.mode === 'train' ? (isCorrect(it) ? ' ok' : ' bad') : ' answered';
-    if (i === S.cur) cls += ' cur';
-    b.className = cls;
+    let cls = 'qnbutton';
+    if (it.chosen !== null) cls += revealed(it) ? (isCorrect(it) ? ' correct' : ' incorrect') : ' answered';
+    if (Store.isFav(S.bank, it.qi)) cls += ' flagged';
+    if (i === S.cur) cls += ' thispage';
+    btns[i].className = cls;
   });
-  const cur = btns[S.cur];
-  if (cur) {
-    const strip = $('nav-strip');
-    strip.scrollTo({ left: cur.offsetLeft - strip.clientWidth / 2 + cur.clientWidth / 2, behavior: 'smooth' });
+}
+
+// Moodle'dagi bitta savol bloki: chapda "Вопрос N" ma'lumoti, o'ngda (mobil: pastda) savol matni
+function renderQue(it, num, opts) {
+  const { review = false, interactive = false, onChoose = null, onFlag = null } = opts;
+  const showRes = review || revealed(it);
+  const que = el('div', 'que' + (showRes || !interactive ? ' locked' : ''));
+
+  const info = el('div', 'info');
+  const no = el('h3', 'no'); no.append('Вопрос '); no.appendChild(el('b', '', String(num)));
+  info.appendChild(no);
+  let state;
+  if (showRes) state = it.chosen === null ? 'Ответ не дан' : (isCorrect(it) ? 'Верно' : 'Неверно');
+  else state = it.chosen === null ? 'Пока нет ответа' : 'Ответ сохранен';
+  info.appendChild(el('div', 'state', state));
+  info.appendChild(el('div', 'grade', showRes ? `Баллов: ${isCorrect(it) ? '1,00' : '0,00'} из 1,00` : 'Балл: 1,00'));
+  if (onFlag) {
+    const fl = Store.isFav(S.bank, it.qi);
+    const f = el('button', 'flag' + (fl ? ' on' : ''), fl ? '⚑ Убрать флажок' : '⚐ Отметить вопрос');
+    f.onclick = onFlag;
+    info.appendChild(f);
   }
+  que.appendChild(info);
+
+  const form = el('div', 'formulation');
+  form.appendChild(el('div', 'qtext', it.q));
+  form.appendChild(el('div', 'prompt', 'Выберите один ответ:'));
+  const name = 'q' + num + '_' + Math.random().toString(36).slice(2, 7);
+  it.options.forEach((opt, k) => {
+    const row = el('label', 'ans-row');
+    const inp = document.createElement('input');
+    inp.type = 'radio'; inp.name = name;
+    inp.checked = it.chosen === opt;
+    inp.disabled = showRes || !interactive;
+    if (!inp.disabled) inp.onchange = () => onChoose && onChoose(opt);
+    row.appendChild(inp);
+    row.appendChild(el('span', 'lbl', `${LETTERS[k] || '•'}. ${opt}`));
+    if (showRes && it.chosen === opt) {
+      const ok = isCorrect(it);
+      row.classList.add(ok ? 'correct' : 'incorrect');
+      row.appendChild(el('span', 'mk', ok ? '✓' : '✗'));
+    }
+    form.appendChild(row);
+  });
+  que.appendChild(form);
+
+  if (showRes) {
+    const out = el('div', 'outcome');
+    if (it.chosen !== null) out.appendChild(el('div', isCorrect(it) ? 'fb-ok' : 'fb-bad', isCorrect(it) ? 'Ваш ответ верный.' : 'Ваш ответ неправильный.'));
+    out.appendChild(el('div', '', 'Правильный ответ: ' + it.correct));
+    que.appendChild(out);
+  }
+  return que;
 }
 
 function renderQuestion() {
   const it = S.items[S.cur];
-  const answered = S.items.filter(x => x.chosen !== null).length;
-  $('quiz-count').textContent = S.mode === 'train'
-    ? `${S.items.filter(isCorrect).length} ✅ · ${answered}/${S.items.length}`
-    : `${answered}/${S.items.length}`;
-  $('q-num').textContent = `Savol #${it.qi + 1}`;
-  $('q-text').textContent = it.q;
-
-  const optsEl = $('options');
-  optsEl.innerHTML = '';
-  const locked = S.mode === 'train' && it.chosen !== null;
-  it.options.forEach(opt => {
-    const b = el('button', 'option');
-    b.appendChild(el('span', 'dot'));
-    b.appendChild(el('span', '', opt));
-    if (S.mode === 'train' && it.chosen !== null) {
-      b.classList.add('locked');
-      if (opt.trim() === it.correct.trim()) b.classList.add('correct');
-      else if (opt === it.chosen) b.classList.add('wrong');
-    } else if (opt === it.chosen) {
-      b.classList.add('sel');
-    }
-    if (!locked) b.onclick = () => choose(opt);
-    optsEl.appendChild(b);
-  });
-
-  const fav = Store.isFav(S.bank, it.qi);
-  $('q-fav').textContent = fav ? '♥' : '♡';
-  const d = Store.get(S.bank);
-  $('q-stat').textContent = d.c.includes(it.qi) ? 'Avval: to\'g\'ri' : d.w.includes(it.qi) ? 'Avval: xato' : '';
-  if (S.mode === 'exam') $('q-stat').textContent = '';
-
-  $('btn-prev').disabled = S.cur === 0;
+  const box = $('que-box');
+  box.innerHTML = '';
+  box.appendChild(renderQue(it, S.cur + 1, {
+    interactive: true,
+    onChoose: (opt) => choose(opt),
+    onFlag: () => { Store.toggleFav(S.bank, it.qi); renderQuestion(); },
+  }));
+  $('btn-prev').style.visibility = S.cur === 0 ? 'hidden' : 'visible';
   const last = S.cur === S.items.length - 1;
-  $('btn-next').textContent = last ? 'Yakunlash ✓' : 'Keyingisi →';
+  $('btn-next').textContent = last ? 'Закончить попытку...' : 'Следующая страница';
   updateNavStrip();
 }
 
@@ -877,8 +1007,7 @@ function choose(opt) {
     it.chosen = opt;
     const ok = isCorrect(it);
     haptic(ok ? 'success' : 'error');
-    // Mashq rejimida statistika darhol yangilanadi
-    Store.answer(S.bank, it.qi, ok);
+    Store.answer(S.bank, it.qi, ok);   // mashqda statistika darhol yoziladi
     Store.save(S.bank);
   } else {
     it.chosen = opt;
@@ -887,44 +1016,57 @@ function choose(opt) {
   renderQuestion();
 }
 
-$('q-fav').onclick = () => {
-  const it = S.items[S.cur];
-  const on = Store.toggleFav(S.bank, it.qi);
-  $('q-fav').textContent = on ? '♥' : '♡';
-  try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch (e) {}
-};
-$('btn-prev').onclick = () => { if (S.cur > 0) { S.cur--; renderQuestion(); } };
+$('btn-prev').onclick = () => { if (S.cur > 0) { S.cur--; renderQuestion(); window.scrollTo(0, 0); } };
 $('btn-next').onclick = () => {
-  if (S.cur < S.items.length - 1) { S.cur++; renderQuestion(); return; }
-  const left = S.items.filter(x => x.chosen === null).length;
-  if (left) askConfirm(`${left} ta savolga javob berilmagan. Testni yakunlaysizmi?`, finishQuiz);
-  else finishQuiz();
+  if (S.cur < S.items.length - 1) { S.cur++; renderQuestion(); window.scrollTo(0, 0); return; }
+  openSummary();
 };
+$('btn-finish-link').onclick = () => openSummary();
+
 function confirmLeaveQuiz() {
-  askConfirm("Test to'xtatilsinmi? Mashq rejimida berilgan javoblar statistikada saqlanadi.", () => {
+  askConfirm("Testdan chiqilsinmi? Mashq rejimida berilgan javoblar statistikada saqlanadi.", () => {
     stopTimer(); S = null; showScreen('screen-home'); renderBankList();
   });
 }
 $('quiz-back').onclick = confirmLeaveQuiz;
 
-/* ---------- Taymer ---------- */
+/* ---------- "Результат попытки" (yakunlashdan oldingi ro'yxat) ---------- */
+function openSummary() {
+  fillBanner('s-', S.bank, S.mode === 'exam' ? 'Imtihon' : 'Mashq');
+  const tb = $('sum-rows');
+  tb.innerHTML = '';
+  S.items.forEach((it, i) => {
+    const tr = el('tr', it.chosen === null ? 'unans' : '');
+    const a = el('button', 'm-link', String(i + 1));
+    a.onclick = () => { S.cur = i; showScreen('screen-quiz'); renderQuestion(); };
+    const td1 = el('td'); td1.appendChild(a);
+    tr.appendChild(td1);
+    tr.appendChild(el('td', '', it.chosen === null ? 'Пока нет ответа' : 'Ответ сохранен'));
+    tb.appendChild(tr);
+  });
+  const left = S.items.filter(x => x.chosen === null).length;
+  $('sum-note').textContent = (S.timeLimit ? `Ограничение по времени: ${Math.round(S.timeLimit / 60)} мин. ` : '')
+    + (left ? `Без ответа: ${left}. ` : '') + 'После отправки вы больше не сможете изменить свои ответы.';
+  showScreen('screen-summary');
+}
+$('btn-sum-back').onclick = () => { showScreen('screen-quiz'); renderQuestion(); };
+$('btn-sum-submit').onclick = () => askConfirm('Отправить всё и завершить тест?', finishQuiz);
+
+/* ---------- Taymer (Moodle: "Оставшееся время") ---------- */
 function startTimer() {
   const t = $('quiz-timer');
+  t.classList.toggle('hidden', !S.timeLimit);
+  if (!S.timeLimit) return;
   const tick = () => {
-    if (!S) return;
-    const el_ = (Date.now() - S.startedAt) / 1000;
-    if (S.timeLimit) {
-      const rem = S.timeLimit - el_;
-      t.textContent = '⏱ ' + fmtTime(rem);
-      t.classList.toggle('low', rem <= 60);
-      if (rem <= 0) {
-        stopTimer();
-        if (tg && tg.showAlert) tg.showAlert('Vaqt tugadi!');
-        finishQuiz();
-      }
-    } else {
-      t.textContent = '⏱ ' + fmtTime(el_);
-      t.classList.remove('low');
+    if (!S || S.finished) return;
+    const rem = S.timeLimit - (Date.now() - S.startedAt) / 1000;
+    const h = Math.floor(Math.max(0, rem) / 3600);
+    t.textContent = 'Оставшееся время ' + h + ':' + fmtTime(Math.max(0, rem) - h * 3600).padStart(5, '0');
+    t.classList.toggle('low', rem <= 60);
+    if (rem <= 0) {
+      stopTimer();
+      if (tg && tg.showAlert) { try { tg.showAlert('Время истекло!'); } catch (e) {} }
+      finishQuiz();
     }
   };
   tick();
@@ -932,48 +1074,61 @@ function startTimer() {
 }
 function stopTimer() { if (S && S.timerId) { clearInterval(S.timerId); S.timerId = null; } }
 
-/* ================= Natija ================= */
+/* ================= Natija (Moodle "Просмотр попытки") ================= */
+function fmtDT(ts) {
+  const d = new Date(ts), p = (n) => String(n).padStart(2, '0');
+  const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+  const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function fmtDur(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return (m ? `${m} мин. ` : '') + `${s} сек.`;
+}
+const num2 = (x) => x.toFixed(2).replace('.', ',');
+
 function finishQuiz() {
   if (!S || S.finished) return;
   S.finished = true;
+  S.finishedAt = Date.now();
   stopTimer();
   const total = S.items.length;
   const correct = S.items.filter(isCorrect).length;
-  const answered = S.items.filter(x => x.chosen !== null).length;
-  const wrong = answered - correct;
-  const dur = Math.round((Date.now() - S.startedAt) / 1000);
+  const dur = Math.round((S.finishedAt - S.startedAt) / 1000);
   // Imtihonda statistika faqat oxirida yoziladi
   if (S.mode === 'exam') S.items.forEach(it => { if (it.chosen !== null) Store.answer(S.bank, it.qi, isCorrect(it)); });
   Store.addHistory(S.bank, { d: Date.now(), m: S.mode === 'exam' ? 'e' : 't', s: correct, n: total, u: dur });
   Store.save(S.bank);
 
-  const pct = total ? Math.round(correct / total * 100) : 0;
-  $('result-score').textContent = `${correct}/${total}`;
-  $('result-sub').textContent = `${pct}% to'g'ri · ${S.mode === 'exam' ? 'Imtihon' : 'Mashq'} · ${fmtTime(dur)}`;
-  const grid = $('result-grid');
-  grid.innerHTML = '';
-  [[correct, "To'g'ri"], [wrong, 'Xato'], [total - answered, 'Javobsiz']].forEach(([v, l]) => {
-    const d = el('div'); d.appendChild(el('b', '', String(v))); d.appendChild(el('span', '', l)); grid.appendChild(d);
+  S.mode = 'review';
+  fillBanner('r-', S.bank, 'Просмотр попытки');
+  const grade = total ? correct / total * 100 : 0;
+  const rows = [
+    ['Тест начат', fmtDT(S.startedAt)],
+    ['Состояние', 'Завершены'],
+    ['Завершен', fmtDT(S.finishedAt)],
+    ['Прошло времени', fmtDur(dur)],
+    ['Баллы', `${num2(correct)}/${num2(total)}`],
+    ['Оценка', `${num2(grade)} из 100,00 (${Math.round(grade)}%)`],
+  ];
+  const tbl = $('result-table');
+  tbl.innerHTML = '';
+  rows.forEach(([k, v]) => {
+    const tr = el('tr'); tr.appendChild(el('th', '', k));
+    const td = el('td', '', v); if (k === 'Оценка') td.style.fontWeight = '700';
+    tr.appendChild(td); tbl.appendChild(tr);
   });
-  haptic(pct >= 60 ? 'success' : 'warning');
+  haptic(grade >= 60 ? 'success' : 'warning');
 
   const bad = S.items.filter(it => !isCorrect(it));
   $('btn-retry-wrong').classList.toggle('hidden', !bad.length);
-  $('btn-retry-wrong').onclick = () => startSession(S.bank, 'train', bad.map(x => x.qi), { shuffleQ: false, shuffleA: true, timeLimit: 0 });
+  $('btn-retry-wrong').textContent = `Xatolarni qayta ishlash (${bad.length})`;
+  const bank = S.bank;
+  $('btn-retry-wrong').onclick = () => startSession(bank, 'train', bad.map(x => x.qi), { shuffleQ: false, shuffleA: true, timeLimit: 0 });
 
   const rev = $('result-review');
   rev.innerHTML = '';
-  if (bad.length) {
-    rev.appendChild(el('div', 'sec-title', `Xatolar va javobsiz savollar (${bad.length})`));
-    bad.forEach(it => {
-      const box = el('div', 'review-item');
-      box.appendChild(el('div', 'rq', `#${it.qi + 1}. ${it.q}`));
-      if (it.chosen !== null) box.appendChild(el('div', 'ro rw', '✗ ' + it.chosen));
-      else box.appendChild(el('div', 'ro muted', '— javob berilmagan'));
-      box.appendChild(el('div', 'ro ra', '✓ ' + it.correct));
-      rev.appendChild(box);
-    });
-  }
+  S.items.forEach((it, i) => rev.appendChild(renderQue(it, i + 1, { review: true })));
   showScreen('screen-result');
 }
 $('btn-retry').onclick = () => {
