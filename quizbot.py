@@ -487,6 +487,22 @@ async def api_bank(request):
     return web.FileResponse(path)
 
 
+IMG_RE = re.compile(r"^[A-Za-z0-9_\-]+\.(jpg|jpeg|png)$")
+
+
+async def api_img(request):
+    """Savol rasmlari (data_*/img/) - ham faqat ruxsat bilan."""
+    res, err = await api_auth(request)
+    if err:
+        return err
+    cfg, _ = res
+    name = request.match_info["name"]
+    path = cfg.data_dir / "img" / name
+    if not IMG_RE.match(name) or not path.is_file():
+        return web.json_response({"ok": False, "reason": "notfound"}, status=404)
+    return web.FileResponse(path)
+
+
 async def start_webapp_server():
     @web.middleware
     async def no_cache_middleware(request, handler):
@@ -504,6 +520,7 @@ async def start_webapp_server():
     app.router.add_get("/index.html", index)
     app.router.add_get("/api/me", api_me)
     app.router.add_get("/api/bank/{key}", api_bank)
+    app.router.add_get("/api/img/{name}", api_img)
 
     runner = web.AppRunner(app)
     await runner.setup()

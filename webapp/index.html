@@ -229,7 +229,7 @@
   .que .info .flag.on { color: #ca3120; }
   .que .formulation { background: #e7f3f5; border: 1px solid #b8dce2; border-radius: 4px; padding: 14px 14px 10px; color: #001a1e; }
   .que .qtext { font-size: 16px; line-height: 1.45; margin-bottom: 16px; }
-  .qimg { display: block; max-width: 100%; height: auto; margin: 0 0 14px; border-radius: 4px; background: #fff; }
+  .q-img { display: block; max-width: 100%; height: auto; margin: 4px 0 14px; border-radius: 4px; background: #fff; }
   .que .prompt { font-size: 14.5px; margin-bottom: 8px; }
   .que .ans-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 4px; border-radius: 4px; cursor: pointer; line-height: 1.4; }
   .que .ans-row input { width: 17px; height: 17px; margin: 2px 0 0; flex: 0 0 auto; accent-color: #0f6cbf; }
@@ -583,6 +583,27 @@ let subjectFilter = 'all';
 const INIT_DATA = (tg && tg.initData) || '';
 function api(path) { return fetch(path, { headers: { 'X-Init-Data': INIT_DATA } }); }
 
+// Savol rasmlari ham initData bilan olinadi (oddiy <img src> sarlavha yubora olmaydi)
+const _imgCache = {};
+function attachImg(container, name) {
+  if (!name) return;
+  const im = document.createElement('img');
+  im.className = 'q-img';
+  im.alt = '';
+  container.appendChild(im);
+  if (/^(data:|https?:)/.test(name)) { im.src = name; return; }
+  const set = (u) => { im.src = u; };
+  if (_imgCache[name]) {
+    if (typeof _imgCache[name] === 'string') set(_imgCache[name]); else _imgCache[name].then(set);
+    return;
+  }
+  _imgCache[name] = api('/api/img/' + encodeURIComponent(name))
+    .then(r => r.ok ? r.blob() : Promise.reject())
+    .then(b => (_imgCache[name] = URL.createObjectURL(b)))
+    .catch(() => { delete _imgCache[name]; return ''; });
+  _imgCache[name].then(set);
+}
+
 function showLocked(reason) {
   const box = $('bank-list');
   $('home-summary').innerHTML = '';
@@ -814,7 +835,7 @@ function startSession(bankKey, mode, idxs, opts) {
     bank: bankKey, mode,
     items: idxs.map(qi => {
       const it = pool[qi];
-      return { qi, q: it.q, img: it.img || null, correct: it.correct, options: opts.shuffleA ? shuffle(it.options) : it.options.slice(), chosen: null };
+      return { qi, q: it.q, img: it.img, correct: it.correct, options: opts.shuffleA ? shuffle(it.options) : it.options.slice(), chosen: null };
     }),
     cur: 0,
     timeLimit: opts.timeLimit || 0,
@@ -877,7 +898,7 @@ function renderQue(it, num, opts) {
 
   const form = el('div', 'formulation');
   form.appendChild(el('div', 'qtext', it.q));
-  if (it.img) { const im = document.createElement('img'); im.className = 'qimg'; im.src = it.img; im.alt = ''; form.appendChild(im); }
+  attachImg(form, it.img);
   form.appendChild(el('div', 'prompt', 'Выберите один ответ:'));
   const name = 'q' + num + '_' + Math.random().toString(36).slice(2, 7);
   it.options.forEach((opt, k) => {
@@ -1098,7 +1119,7 @@ function renderView() {
     head.style.fontSize = '15.5px';
     head.appendChild(el('span', 'q-num', `Savol #${qi + 1}` + (d.c.includes(qi) ? ' · ✓' : d.w.includes(qi) ? ' · ✗' : '')));
     head.appendChild(el('div', '', it.q));
-    if (it.img) { const im = document.createElement('img'); im.className = 'qimg'; im.src = it.img; im.alt = ''; head.appendChild(im); }
+    attachImg(head, it.img);
     card.appendChild(head);
     it.options.forEach(o => {
       const r = el('div', 'option locked' + (o.trim() === it.correct.trim() ? ' correct' : ''));
