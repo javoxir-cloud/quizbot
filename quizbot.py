@@ -6,7 +6,6 @@ uchun bitta.
 
 Render -> Environment:
   BOT_TOKEN      1-bot tokeni           (savollar: data/)
-  BOT2_TOKEN     2-bot tokeni, ixtiyoriy (savollar: data_ped/ yoki BOT2_DATA)
   WEBAPP_URL     https://....onrender.com
   ADMIN_IDS      admin Telegram ID lari, vergul bilan (bo'sh = ochiq rejim)
   DATABASE_URL   PostgreSQL (ruxsatlar saqlanadi)
@@ -59,7 +58,7 @@ INIT_DATA_MAX_AGE = 7 * 24 * 3600
 
 @dataclass
 class BotCfg:
-    key: str          # ichki nom: "main", "ped"
+    key: str          # ichki nom: "main"
     token: str
     data_dir: Path    # savol banklari papkasi (banks.json + <key>.json fayllar)
     bot: Optional[Bot] = None
@@ -70,7 +69,7 @@ def _bot_cfgs():
     cfgs = []
     specs = [
         ("main", os.getenv("BOT_TOKEN", ""), os.getenv("BOT_DATA", "data")),
-        ("ped", os.getenv("BOT2_TOKEN", ""), os.getenv("BOT2_DATA", "data_ped")),
+        # Ikkinchi bot qo'shish kerak bo'lsa: ("nom", os.getenv("BOT2_TOKEN", ""), "data_nom"),
     ]
     for key, token, data in specs:
         token = token.strip()
